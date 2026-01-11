@@ -9,9 +9,12 @@ import {
   Alert,
   RefreshControl,
   StatusBar,
-  Platform
+  Platform,
+  Modal,
+  Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const HomeProfesorScreen = ({ navigation }) => {
   // Datos del profesor
@@ -20,13 +23,15 @@ const HomeProfesorScreen = ({ navigation }) => {
     email: "profesor@escuela.com",
     rol: "Profesor",
     especialidad: "Matemáticas",
-    matricula: "PROF-2023-001"
+    matricula: "PROF-2023-001",
+    avatar: null
   };
-  
-  const isDarkMode = false;
   
   // Estados
   const [refreshing, setRefreshing] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  
   const [estadisticas] = useState({
     totalAlumnos: 45,
     clasesHoy: 3,
@@ -41,15 +46,15 @@ const HomeProfesorScreen = ({ navigation }) => {
   ]);
   
   const [tareasRecientes] = useState([
-    { id: 1, titulo: 'Examen Parcial', materia: 'Matemáticas', fecha: '25 Mar', entregas: 38, total: 45 },
-    { id: 2, titulo: 'Proyecto Final', materia: 'Programación', fecha: '30 Mar', entregas: 15, total: 45 },
-    { id: 3, titulo: 'Práctica de Laboratorio', materia: 'Física', fecha: '28 Mar', entregas: 42, total: 45 },
+    { id: 1, titulo: 'Examen Parcial', materia: 'Matemáticas', fecha: '25 Mar', entregas: 38, total: 45, icon: 'file-document' },
+    { id: 2, titulo: 'Proyecto Final', materia: 'Programación', fecha: '30 Mar', entregas: 15, total: 45, icon: 'code-braces' },
+    { id: 3, titulo: 'Práctica de Laboratorio', materia: 'Física', fecha: '28 Mar', entregas: 42, total: 45, icon: 'flask' },
   ]);
   
   const [anuncios] = useState([
-    { id: 1, titulo: 'Reunión de Departamento', fecha: 'Hoy 16:00', descripcion: 'Sala de profesores', tipo: 'reunion' },
-    { id: 2, titulo: 'Capacitación Nueva Plataforma', fecha: 'Mañana 10:00', descripcion: 'Aula Magna', tipo: 'capacitacion' },
-    { id: 3, titulo: 'Entrega de Calificaciones', fecha: '28 Mar', descripcion: 'Fecha límite para subir notas', tipo: 'importante' },
+    { id: 1, titulo: 'Reunión de Departamento', fecha: 'Hoy 16:00', descripcion: 'Sala de profesores', tipo: 'reunion', icon: 'account-group' },
+    { id: 2, titulo: 'Capacitación Nueva Plataforma', fecha: 'Mañana 10:00', descripcion: 'Aula Magna', tipo: 'capacitacion', icon: 'school' },
+    { id: 3, titulo: 'Entrega de Calificaciones', fecha: '28 Mar', descripcion: 'Fecha límite para subir notas', tipo: 'importante', icon: 'alert-circle' },
   ]);
 
   // Fecha actual
@@ -60,6 +65,7 @@ const HomeProfesorScreen = ({ navigation }) => {
     day: 'numeric'
   });
 
+  // Funciones
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
@@ -69,71 +75,93 @@ const HomeProfesorScreen = ({ navigation }) => {
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.removeItem('userToken');
-    navigation.replace('Login');
+    try {
+      await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userData');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
   };
 
-  const handleCardPress = (tipo) => {
-    Alert.alert('Navegar', `Ir a ${tipo}`);
+  const confirmLogout = () => {
+    setLogoutModalVisible(false);
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro de que quieres salir?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Cerrar Sesión', 
+          onPress: handleLogout
+        }
+      ]
+    );
   };
 
-  const handleClasePress = (clase) => {
-    Alert.alert(clase.materia, `Hora: ${clase.hora}\nAula: ${clase.aula}`);
+  const navigateToPerfil = () => {
+    setMenuVisible(false);
+    navigation.navigate('PerfilProfesor', { user });
   };
 
-  const handleTareaPress = (tarea) => {
-    Alert.alert(tarea.titulo, `Materia: ${tarea.materia}\nEntregas: ${tarea.entregas}/${tarea.total}`);
+  const navigateToNotificaciones = () => {
+    setMenuVisible(false);
+    navigation.navigate('NotificacionesProfesor', { anuncios });
   };
 
-  const handleAnuncioPress = (anuncio) => {
-    Alert.alert(anuncio.titulo, anuncio.descripcion);
+  const getShadowStyle = (elevation = 3) => {
+    if (Platform.OS === 'web') {
+      return {
+        boxShadow: '0px 2px 6px rgba(0,0,0,0.1)',
+      };
+    }
+    return {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: elevation,
+    };
   };
 
-  // Estilos
-  const containerStyle = isDarkMode ? styles.darkContainer : styles.lightContainer;
-  const headerStyle = isDarkMode ? styles.darkHeader : styles.lightHeader;
-  const cardStyle = isDarkMode ? styles.darkCard : styles.lightCard;
-  const textStyle = isDarkMode ? styles.darkText : styles.lightText;
-  const subtextStyle = isDarkMode ? styles.darkSubtext : styles.lightSubtext;
+  const MenuItem = ({ title, icon, color = '#333', onPress }) => (
+    <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+      <Icon name={icon} size={22} color={color} style={styles.menuItemIcon} />
+      <Text style={[styles.menuItemText, { color }]}>{title}</Text>
+      <Icon name="chevron-right" size={20} color="#999" />
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView style={[styles.safeArea, containerStyle]}>
-      <StatusBar 
-        barStyle={isDarkMode ? "light-content" : "dark-content"} 
-        backgroundColor={isDarkMode ? "#1E1E1E" : "#FFFFFF"}
-      />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       {/* Header */}
-      <View style={[styles.header, headerStyle]}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity 
-            style={styles.avatarContainer}
-            onPress={() => Alert.alert('Perfil', 'Ver perfil del profesor')}
-          >
-            <Text style={{ fontSize: 40, color: '#2196F3' }}>👨‍🏫</Text>
+      <View style={[styles.header, getShadowStyle()]}>
+        <View style={styles.userInfo}>
+          <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuButton}>
+            <Icon name="menu" size={28} color="#333" />
           </TouchableOpacity>
-          <View>
-            <Text style={[styles.greeting, textStyle]}>
-              ¡Buen día, Prof. {user.nombre.split(' ')[0]}!
+          <View style={styles.userDetails}>
+            <Text style={styles.welcomeText}>Panel del Profesor</Text>
+            <Text style={styles.userName}>Prof. {user.nombre}</Text>
+            <Text style={styles.userRole}>
+              <Icon name="certificate" size={12} color="#FF9800" /> {user.especialidad}
             </Text>
-            <Text style={[styles.date, subtextStyle]}>{fechaActual}</Text>
           </View>
         </View>
-        <View style={styles.headerRight}>
+        <View style={styles.headerActions}>
           <TouchableOpacity 
             style={styles.notificationButton}
-            onPress={() => Alert.alert('Notificaciones', 'Tienes 3 notificaciones nuevas')}
+            onPress={navigateToNotificaciones}
           >
-            <Text style={{ fontSize: 24, color: '#666' }}>🔔</Text>
+            <Icon name="bell-outline" size={24} color="#333" />
             <View style={styles.notificationBadge}>
-              <Text style={styles.notificationCount}>3</Text>
+              <Text style={styles.badgeText}>3</Text>
             </View>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.logoutButton}
-            onPress={handleLogout}
-          >
-            <Text style={styles.logoutButtonText}>✕ Salir</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -150,238 +178,411 @@ const HomeProfesorScreen = ({ navigation }) => {
           />
         }
       >
+        {/* ========== FECHA ACTUAL ========== */}
+        <View style={styles.dateContainer}>
+          <Icon name="calendar" size={18} color="#666" />
+          <Text style={styles.dateText}>{fechaActual}</Text>
+        </View>
+
         {/* ========== ESTADÍSTICAS RÁPIDAS ========== */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, textStyle]}>Resumen del Día</Text>
-          <View style={styles.statsContainer}>
+          <Text style={styles.sectionTitle}>Resumen del Día</Text>
+          <View style={styles.statsGrid}>
             <TouchableOpacity 
-              style={[styles.statCard, cardStyle]}
+              style={[styles.statCard, getShadowStyle()]}
               onPress={() => navigation.navigate('ListaAlumnos')}
+              activeOpacity={0.8}
             >
-              <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
-                <Text style={{ fontSize: 24, color: '#2196F3' }}>👥</Text>
+              <View style={[styles.statIconContainer, { backgroundColor: '#E3F2FD' }]}>
+                <Icon name="account-multiple" size={24} color="#2196F3" />
               </View>
-              <Text style={[styles.statNumber, textStyle]}>{estadisticas.totalAlumnos}</Text>
-              <Text style={[styles.statLabel, subtextStyle]}>Alumnos</Text>
+              <Text style={styles.statNumber}>{estadisticas.totalAlumnos}</Text>
+              <Text style={styles.statLabel}>Alumnos</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.statCard, cardStyle]}
-              onPress={() => handleCardPress('clases')}
+              style={[styles.statCard, getShadowStyle()]}
+              onPress={() => navigation.navigate('HorarioProfesor')}
+              activeOpacity={0.8}
             >
-              <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
-                <Text style={{ fontSize: 24, color: '#4CAF50' }}>📅</Text>
+              <View style={[styles.statIconContainer, { backgroundColor: '#E8F5E9' }]}>
+                <Icon name="calendar-clock" size={24} color="#4CAF50" />
               </View>
-              <Text style={[styles.statNumber, textStyle]}>{estadisticas.clasesHoy}</Text>
-              <Text style={[styles.statLabel, subtextStyle]}>Clases Hoy</Text>
+              <Text style={styles.statNumber}>{estadisticas.clasesHoy}</Text>
+              <Text style={styles.statLabel}>Clases Hoy</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.statCard, cardStyle]}
-              onPress={() => handleCardPress('tareas')}
+              style={[styles.statCard, getShadowStyle()]}
+              onPress={() => navigation.navigate('TareasPendientes')}
+              activeOpacity={0.8}
             >
-              <View style={[styles.statIcon, { backgroundColor: '#FFF3E0' }]}>
-                <Text style={{ fontSize: 24, color: '#FF9800' }}>📋</Text>
+              <View style={[styles.statIconContainer, { backgroundColor: '#FFF3E0' }]}>
+                <Icon name="clipboard-check" size={24} color="#FF9800" />
               </View>
-              <Text style={[styles.statNumber, textStyle]}>{estadisticas.tareasPendientes}</Text>
-              <Text style={[styles.statLabel, subtextStyle]}>Tareas Pendientes</Text>
+              <Text style={styles.statNumber}>{estadisticas.tareasPendientes}</Text>
+              <Text style={styles.statLabel}>Tareas Pendientes</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* ========== CLASES DE HOY ========== */}
-        <View style={styles.section}>
+        <View style={[styles.section, getShadowStyle()]}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, textStyle]}>Clases de Hoy</Text>
+            <Text style={styles.sectionTitle}>Clases de Hoy</Text>
             <TouchableOpacity onPress={() => navigation.navigate('HorarioProfesor')}>
-              <Text style={[styles.seeAll, { color: '#2196F3' }]}>Ver Horario</Text>
+              <Text style={styles.seeAll}>Ver Horario Completo</Text>
             </TouchableOpacity>
           </View>
           
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            style={styles.horizontalScroll}
-          >
-            {clasesHoy.map((clase) => (
+          {clasesHoy.map((clase) => (
+            <TouchableOpacity 
+              key={clase.id} 
+              style={styles.claseItem}
+              onPress={() => navigation.navigate('DetalleClase', { clase })}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.claseTime, { borderLeftColor: clase.color }]}>
+                <Text style={styles.claseHora}>{clase.hora}</Text>
+              </View>
+              <View style={styles.claseInfo}>
+                <Text style={styles.claseMateria}>{clase.materia}</Text>
+                <View style={styles.claseDetails}>
+                  <View style={styles.claseDetail}>
+                    <Icon name="map-marker" size={14} color="#666" />
+                    <Text style={styles.claseDetailText}>{clase.aula}</Text>
+                  </View>
+                  <View style={styles.claseDetail}>
+                    <Icon name="clock-outline" size={14} color="#666" />
+                    <Text style={styles.claseDetailText}>90 min</Text>
+                  </View>
+                </View>
+              </View>
               <TouchableOpacity 
-                key={clase.id} 
-                style={[styles.claseCard, cardStyle]}
-                onPress={() => handleClasePress(clase)}
+                style={styles.claseAction}
+                onPress={() => navigation.navigate('TomarAsistencia', { clase })}
               >
-                <View style={[styles.claseColor, { backgroundColor: clase.color }]} />
-                <Text style={[styles.claseMateria, textStyle]}>{clase.materia}</Text>
-                <View style={styles.claseInfo}>
-                  <Text style={{ fontSize: 14, color: '#757575' }}>🕐</Text>
-                  <Text style={[styles.claseHora, subtextStyle]}>{clase.hora}</Text>
-                </View>
-                <View style={styles.claseInfo}>
-                  <Text style={{ fontSize: 14, color: '#757575' }}>📍</Text>
-                  <Text style={[styles.claseAula, subtextStyle]}>{clase.aula}</Text>
-                </View>
-                <TouchableOpacity 
-                  style={styles.claseButton}
-                  onPress={() => navigation.navigate('TomarAsistencia')}
-                >
-                  <Text style={styles.claseButtonText}>Tomar Asistencia</Text>
-                </TouchableOpacity>
+                <Icon name="clipboard-check-outline" size={20} color="#2196F3" />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* ========== TAREAS Y EVALUACIONES ========== */}
-        <View style={styles.section}>
+        <View style={[styles.section, getShadowStyle()]}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, textStyle]}>Tareas y Evaluaciones</Text>
-            <TouchableOpacity onPress={() => Alert.alert('Tareas', 'Ver todas las tareas')}>
-              <Text style={[styles.seeAll, { color: '#2196F3' }]}>Ver Todas</Text>
+            <Text style={styles.sectionTitle}>Tareas y Evaluaciones</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('TodasTareas')}>
+              <Text style={styles.seeAll}>Ver Todas</Text>
             </TouchableOpacity>
           </View>
           
           {tareasRecientes.map((tarea) => (
             <TouchableOpacity 
               key={tarea.id} 
-              style={[styles.tareaCard, cardStyle]}
-              onPress={() => handleTareaPress(tarea)}
+              style={styles.tareaItem}
+              onPress={() => navigation.navigate('DetalleTarea', { tarea })}
+              activeOpacity={0.7}
             >
-              <View style={styles.tareaHeader}>
-                <View style={styles.tareaLeft}>
-                  <Text style={{ fontSize: 24, color: '#2196F3' }}>📋</Text>
-                  <View style={styles.tareaInfo}>
-                    <Text style={[styles.tareaTitulo, textStyle]}>{tarea.titulo}</Text>
-                    <Text style={[styles.tareaMateria, subtextStyle]}>{tarea.materia}</Text>
+              <View style={styles.tareaIconContainer}>
+                <Icon name={tarea.icon} size={24} color="#2196F3" />
+              </View>
+              <View style={styles.tareaInfo}>
+                <View style={styles.tareaHeader}>
+                  <Text style={styles.tareaTitulo}>{tarea.titulo}</Text>
+                  <Text style={styles.tareaFecha}>{tarea.fecha}</Text>
+                </View>
+                <Text style={styles.tareaMateria}>{tarea.materia}</Text>
+                
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressLabels}>
+                    <Text style={styles.progressText}>Entregas: {tarea.entregas}/{tarea.total}</Text>
+                    <Text style={styles.progressPercent}>
+                      {Math.round((tarea.entregas / tarea.total) * 100)}%
+                    </Text>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View 
+                      style={[
+                        styles.progressFill, 
+                        { width: `${(tarea.entregas / tarea.total) * 100}%` }
+                      ]} 
+                    />
                   </View>
                 </View>
-                <View style={styles.tareaFechaContainer}>
-                  <Text style={[styles.tareaFecha, subtextStyle]}>{tarea.fecha}</Text>
-                  <Text style={{ fontSize: 14, color: '#757575' }}>📅</Text>
+                
+                <View style={styles.tareaActions}>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, styles.calificarButton]}
+                    onPress={() => navigation.navigate('CalificarTarea', { tarea })}
+                  >
+                    <Icon name="pencil" size={16} color="#fff" />
+                    <Text style={styles.actionButtonText}>Calificar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, styles.detallesButton]}
+                    onPress={() => navigation.navigate('DetalleTarea', { tarea })}
+                  >
+                    <Text style={styles.detallesButtonText}>Detalles</Text>
+                  </TouchableOpacity>
                 </View>
-              </View>
-              
-              <View style={styles.progressContainer}>
-                <View style={styles.progressBar}>
-                  <View 
-                    style={[
-                      styles.progressFill, 
-                      { width: `${(tarea.entregas / tarea.total) * 100}%` }
-                    ]} 
-                  />
-                </View>
-                <Text style={[styles.progressText, subtextStyle]}>
-                  {tarea.entregas} de {tarea.total} entregados
-                </Text>
-              </View>
-              
-              <View style={styles.tareaActions}>
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.calificarButton]}
-                  onPress={() => navigation.navigate('CalificarTareas')}
-                >
-                  <Text style={{ fontSize: 16, color: '#FFFFFF' }}>✏️</Text>
-                  <Text style={styles.actionButtonText}>Calificar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.actionButton, styles.detallesButton]}
-                  onPress={() => handleTareaPress(tarea)}
-                >
-                  <Text style={[styles.actionButtonText, { color: '#2196F3' }]}>Detalles</Text>
-                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* ========== ANUNCIOS ========== */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, textStyle]}>Anuncios y Recordatorios</Text>
+        {/* ========== ANUNCIOS Y RECORDATORIOS ========== */}
+        <View style={[styles.section, getShadowStyle()]}>
+          <Text style={styles.sectionTitle}>Anuncios y Recordatorios</Text>
           
           {anuncios.map((anuncio) => (
             <TouchableOpacity 
               key={anuncio.id} 
-              style={[styles.anuncioCard, cardStyle]}
-              onPress={() => handleAnuncioPress(anuncio)}
+              style={styles.anuncioItem}
+              onPress={() => navigation.navigate('DetalleAnuncio', { anuncio })}
+              activeOpacity={0.7}
             >
               <View style={[
                 styles.anuncioIcon, 
-                { backgroundColor: anuncio.tipo === 'reunion' ? '#2196F3' : 
-                                 anuncio.tipo === 'capacitacion' ? '#4CAF50' : '#FF9800' }
+                { backgroundColor: anuncio.tipo === 'reunion' ? '#2196F320' : 
+                                 anuncio.tipo === 'capacitacion' ? '#4CAF5020' : '#FF980020' }
               ]}>
-                <Text style={{ fontSize: 20, color: '#FFFFFF' }}>
-                  {anuncio.tipo === 'reunion' ? '👥' : 
-                   anuncio.tipo === 'capacitacion' ? '🏫' : '⚠️'}
-                </Text>
+                <Icon 
+                  name={anuncio.icon} 
+                  size={20} 
+                  color={anuncio.tipo === 'reunion' ? '#2196F3' : 
+                         anuncio.tipo === 'capacitacion' ? '#4CAF50' : '#FF9800'} 
+                />
               </View>
               <View style={styles.anuncioContent}>
-                <Text style={[styles.anuncioTitulo, textStyle]}>{anuncio.titulo}</Text>
-                <Text style={[styles.anuncioDesc, subtextStyle]}>{anuncio.descripcion}</Text>
+                <View style={styles.anuncioHeader}>
+                  <Text style={styles.anuncioTitulo}>{anuncio.titulo}</Text>
+                  <View style={[
+                    styles.anuncioBadge,
+                    { 
+                      backgroundColor: anuncio.tipo === 'reunion' ? '#2196F320' : 
+                                      anuncio.tipo === 'capacitacion' ? '#4CAF5020' : '#FF980020' 
+                    }
+                  ]}>
+                    <Text style={[
+                      styles.anuncioBadgeText,
+                      { 
+                        color: anuncio.tipo === 'reunion' ? '#2196F3' : 
+                               anuncio.tipo === 'capacitacion' ? '#4CAF50' : '#FF9800' 
+                      }
+                    ]}>
+                      {anuncio.tipo}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.anuncioDesc}>{anuncio.descripcion}</Text>
                 <View style={styles.anuncioFecha}>
-                  <Text style={{ fontSize: 12, color: '#757575' }}>🕒</Text>
-                  <Text style={[styles.anuncioFechaText, subtextStyle]}>{anuncio.fecha}</Text>
+                  <Icon name="clock-outline" size={12} color="#999" />
+                  <Text style={styles.anuncioFechaText}>{anuncio.fecha}</Text>
                 </View>
               </View>
-              <Text style={{ fontSize: 20, color: '#757575' }}>›</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {/* ========== ACCIONES RÁPIDAS ========== */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, textStyle]}>Acciones Rápidas</Text>
+        <View style={[styles.section, getShadowStyle()]}>
+          <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
           <View style={styles.actionsGrid}>
             <TouchableOpacity 
-              style={[styles.actionCard, cardStyle]}
+              style={styles.actionCard}
               onPress={() => navigation.navigate('NuevaTarea')}
+              activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#E3F2FD' }]}>
-                <Text style={{ fontSize: 28, color: '#2196F3' }}>➕</Text>
+                <Icon name="plus-circle" size={28} color="#2196F3" />
               </View>
-              <Text style={[styles.actionText, textStyle]}>Nueva Tarea</Text>
+              <Text style={styles.actionText}>Nueva Tarea</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.actionCard, cardStyle]}
+              style={styles.actionCard}
               onPress={() => navigation.navigate('TomarAsistencia')}
+              activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#E8F5E9' }]}>
-                <Text style={{ fontSize: 28, color: '#4CAF50' }}>✔️</Text>
+                <Icon name="clipboard-check-outline" size={28} color="#4CAF50" />
               </View>
-              <Text style={[styles.actionText, textStyle]}>Registrar Asistencia</Text>
+              <Text style={styles.actionText}>Registrar Asistencia</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.actionCard, cardStyle]}
+              style={styles.actionCard}
               onPress={() => navigation.navigate('SubirCalificaciones')}
+              activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#FFF3E0' }]}>
-                <Text style={{ fontSize: 28, color: '#FF9800' }}>⬆️</Text>
+                <Icon name="upload" size={28} color="#FF9800" />
               </View>
-              <Text style={[styles.actionText, textStyle]}>Subir Calificaciones</Text>
+              <Text style={styles.actionText}>Subir Calificaciones</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.actionCard, cardStyle]}
+              style={styles.actionCard}
               onPress={() => navigation.navigate('EnviarComunicado')}
+              activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#F3E5F5' }]}>
-                <Text style={{ fontSize: 28, color: '#9C27B0' }}>✉️</Text>
+                <Icon name="email-send" size={28} color="#9C27B0" />
               </View>
-              <Text style={[styles.actionText, textStyle]}>Enviar Comunicado</Text>
+              <Text style={styles.actionText}>Enviar Comunicado</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Espacio al final */}
-        <View style={styles.footerSpacer} />
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.footerContent}>
+            <Icon name="school" size={40} color="#E0E0E0" />
+            <Text style={styles.footerText}>Sistema de Gestión Docente v2.0</Text>
+            <Text style={styles.footerSubtext}>© 2024 - Escuela Tecnológica</Text>
+          </View>
+        </View>
       </ScrollView>
 
-      {/* Botón Flotante */}
-      <TouchableOpacity 
-        style={styles.floatingButton}
-        onPress={() => Alert.alert('Acción Rápida', '¿Qué deseas hacer?')}
+      {/* ===== MENÚ LATERAL ===== */}
+      <Modal
+        transparent={true}
+        animationType="fade"
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
       >
-        <Text style={{ fontSize: 24, color: '#FFFFFF' }}>+</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setMenuVisible(false)}
+        >
+          <View style={[styles.menu, getShadowStyle(10)]}>
+            <View style={styles.menuHeader}>
+              {user.avatar ? (
+                <Image source={{ uri: user.avatar }} style={styles.menuAvatar} />
+              ) : (
+                <View style={[styles.menuAvatar, styles.avatarFallback]}>
+                  <Icon name="teach" size={32} color="#fff" />
+                </View>
+              )}
+              <View style={styles.menuUserInfo}>
+                <Text style={styles.menuUserName}>Prof. {user.nombre}</Text>
+                <Text style={styles.menuUserRole}>
+                  <Icon name="certificate" size={12} color="#FF9800" /> {user.especialidad}
+                </Text>
+                <Text style={styles.menuUserEmail}>{user.email}</Text>
+              </View>
+            </View>
+
+            <View style={styles.menuDivider} />
+
+            <MenuItem 
+              title="Dashboard" 
+              icon="view-dashboard-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+              }} 
+            />
+            <MenuItem 
+              title="Mi Perfil" 
+              icon="account-outline" 
+              onPress={navigateToPerfil} 
+            />
+            <MenuItem 
+              title="Mis Clases" 
+              icon="calendar-blank-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('HorarioProfesor');
+              }} 
+            />
+            <MenuItem 
+              title="Lista de Alumnos" 
+              icon="account-multiple-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('ListaAlumnos');
+              }} 
+            />
+            <MenuItem 
+              title="Calificaciones" 
+              icon="clipboard-check-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('Calificaciones');
+              }} 
+            />
+            <MenuItem 
+              title="Tareas y Evaluaciones" 
+              icon="file-document-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('TareasPendientes');
+              }} 
+            />
+            <MenuItem 
+              title="Notificaciones" 
+              icon="bell-outline" 
+              onPress={navigateToNotificaciones} 
+            />
+
+            <View style={styles.menuDivider} />
+
+            <MenuItem 
+              title="Configuración" 
+              icon="cog-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate('ConfiguracionProfesor');
+              }} 
+            />
+            <MenuItem 
+              title="Cerrar Sesión" 
+              icon="logout-variant" 
+              color="#F44336"
+              onPress={() => {
+                setMenuVisible(false);
+                setLogoutModalVisible(true);
+              }} 
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* ===== MODAL DE CERRAR SESIÓN ===== */}
+      <Modal
+        transparent={true}
+        visible={logoutModalVisible}
+        animationType="fade"
+        onRequestClose={() => setLogoutModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, getShadowStyle(10)]}>
+            <Icon name="logout-variant" size={50} color="#F44336" style={styles.modalIcon} />
+            <Text style={styles.modalTitle}>Cerrar Sesión</Text>
+            <Text style={styles.modalDescription}>
+              ¿Estás seguro de que quieres salir del sistema?
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setLogoutModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={confirmLogout}
+              >
+                <Text style={styles.confirmButtonText}>Cerrar Sesión</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -389,108 +590,91 @@ const HomeProfesorScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-  },
-  lightContainer: {
     backgroundColor: '#F5F7FA',
-  },
-  darkContainer: {
-    backgroundColor: '#121212',
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    paddingTop: 10,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#EEEEEE',
   },
-  headerLeft: {
+  userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  avatarContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#F0F7FF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+  menuButton: {
+    padding: 8,
+    marginRight: 15,
   },
-  greeting: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#212121',
+  userDetails: {
+    flex: 1,
   },
-  date: {
+  welcomeText: {
     fontSize: 12,
-    color: '#757575',
-    marginTop: 2,
+    color: '#666',
+    fontWeight: '500',
+    marginBottom: 2,
   },
-  lightText: {
+  userName: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#212121',
+    marginBottom: 3,
   },
-  darkText: {
-    color: '#FFFFFF',
+  userRole: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
   },
-  lightSubtext: {
-    color: '#757575',
-  },
-  darkSubtext: {
-    color: '#B0B0B0',
-  },
-  headerRight: {
+  headerActions: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
   },
   notificationButton: {
-    padding: 8,
+    padding: 10,
     position: 'relative',
-  },
-  logoutButton: {
-    backgroundColor: '#F44336',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  logoutButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
   },
   notificationBadge: {
     position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: '#FF5252',
+    top: 5,
+    right: 5,
+    backgroundColor: '#F44336',
     borderRadius: 10,
-    minWidth: 18,
+    width: 18,
     height: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  notificationCount: {
-    color: '#FFFFFF',
+  badgeText: {
+    color: '#fff',
     fontSize: 10,
     fontWeight: 'bold',
   },
   container: {
     flex: 1,
   },
-  section: {
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    marginTop: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  dateText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 8,
+  },
+  section: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 20,
+    marginBottom: 15,
+    borderRadius: 16,
+    padding: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -500,160 +684,149 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: '#212121',
   },
   seeAll: {
     fontSize: 14,
+    color: '#2196F3',
     fontWeight: '500',
   },
-  statsContainer: {
+  statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
   },
   statCard: {
     flex: 1,
     alignItems: 'center',
     padding: 15,
     borderRadius: 12,
-    marginHorizontal: 4,
-    minHeight: 110,
+    marginHorizontal: 5,
     backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  statIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  statIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   statNumber: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: '#212121',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#757575',
+    color: '#666',
     textAlign: 'center',
   },
-  horizontalScroll: {
-    marginHorizontal: -20,
-    paddingHorizontal: 20,
+  claseItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
   },
-  claseCard: {
-    width: 200,
-    borderRadius: 12,
-    padding: 15,
-    marginRight: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  claseTime: {
+    width: 80,
+    borderLeftWidth: 3,
+    paddingLeft: 10,
   },
-  claseColor: {
-    width: '100%',
-    height: 4,
-    borderRadius: 2,
-    marginBottom: 12,
+  claseHora: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  claseInfo: {
+    flex: 1,
+    marginLeft: 15,
   },
   claseMateria: {
     fontSize: 16,
     fontWeight: '600',
     color: '#212121',
-    marginBottom: 8,
-  },
-  claseInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 6,
   },
-  claseHora: {
-    fontSize: 12,
-    color: '#757575',
-    marginLeft: 6,
+  claseDetails: {
+    flexDirection: 'row',
   },
-  claseAula: {
-    fontSize: 12,
-    color: '#757575',
-    marginLeft: 6,
-  },
-  claseButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+  claseDetail: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
+    marginRight: 15,
   },
-  claseButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
+  claseDetailText: {
+    fontSize: 13,
+    color: '#666',
+    marginLeft: 4,
   },
-  tareaCard: {
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  claseAction: {
+    padding: 10,
+  },
+  tareaItem: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
+  },
+  tareaIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#F5F5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  tareaInfo: {
+    flex: 1,
   },
   tareaHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  tareaLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  tareaInfo: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  tareaTitulo: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#212121',
     marginBottom: 4,
   },
-  tareaMateria: {
-    fontSize: 12,
-    color: '#757575',
-  },
-  tareaFechaContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  tareaTitulo: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#212121',
+    flex: 1,
   },
   tareaFecha: {
     fontSize: 12,
-    color: '#757575',
-    marginRight: 4,
+    color: '#999',
+    marginLeft: 10,
+  },
+  tareaMateria: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 10,
   },
   progressContainer: {
     marginBottom: 12,
+  },
+  progressLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  progressText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  progressPercent: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4CAF50',
   },
   progressBar: {
     height: 6,
     backgroundColor: '#E0E0E0',
     borderRadius: 3,
-    marginBottom: 6,
     overflow: 'hidden',
   },
   progressFill: {
@@ -661,21 +834,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
     borderRadius: 3,
   },
-  progressText: {
-    fontSize: 11,
-    color: '#757575',
-    textAlign: 'right',
-  },
   tareaActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
     paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 6,
+    marginRight: 10,
   },
   calificarButton: {
     backgroundColor: '#2196F3',
@@ -691,18 +860,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 6,
   },
-  anuncioCard: {
+  detallesButtonText: {
+    color: '#2196F3',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  anuncioItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F5',
   },
   anuncioIcon: {
     width: 40,
@@ -715,31 +882,47 @@ const styles = StyleSheet.create({
   anuncioContent: {
     flex: 1,
   },
-  anuncioTitulo: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#212121',
+  anuncioHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 4,
   },
+  anuncioTitulo: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#212121',
+    flex: 1,
+  },
+  anuncioBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 10,
+  },
+  anuncioBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
   anuncioDesc: {
-    fontSize: 12,
-    color: '#757575',
-    marginBottom: 6,
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 18,
+    marginBottom: 8,
   },
   anuncioFecha: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   anuncioFechaText: {
-    fontSize: 10,
-    color: '#757575',
+    fontSize: 12,
+    color: '#999',
     marginLeft: 4,
   },
   actionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 10,
   },
   actionCard: {
     width: '48%',
@@ -747,12 +930,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 12,
     marginBottom: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: '#F8F9FA',
   },
   actionIcon: {
     width: 56,
@@ -764,28 +942,158 @@ const styles = StyleSheet.create({
   },
   actionText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#212121',
+    color: '#616161',
     textAlign: 'center',
+    fontWeight: '500',
   },
-  footerSpacer: {
-    height: 80,
+  footer: {
+    marginTop: 20,
+    paddingVertical: 25,
+    alignItems: 'center',
   },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2196F3',
+  footerContent: {
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#9E9E9E',
+    fontWeight: '500',
+    marginTop: 10,
+  },
+  footerSubtext: {
+    fontSize: 11,
+    color: '#BDBDBD',
+    marginTop: 5,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  menu: {
+    backgroundColor: '#fff',
+    width: 300,
+    height: '100%',
+    paddingTop: 50,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  menuAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 15,
+  },
+  avatarFallback: {
+    backgroundColor: '#FF9800',
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+  },
+  menuUserInfo: {
+    flex: 1,
+  },
+  menuUserName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 3,
+  },
+  menuUserRole: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 5,
+  },
+  menuUserEmail: {
+    fontSize: 12,
+    color: '#999',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 10,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f8f8f8',
+  },
+  menuItemIcon: {
+    width: 28,
+  },
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+    marginLeft: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 25,
+    width: '85%',
+    alignItems: 'center',
+  },
+  modalIcon: {
+    marginBottom: 15,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  modalDescription: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 25,
+    lineHeight: 22,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginHorizontal: 6,
+  },
+  cancelButton: {
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  cancelButtonText: {
+    color: '#666',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  confirmButton: {
+    backgroundColor: '#F44336',
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
   },
 });
 

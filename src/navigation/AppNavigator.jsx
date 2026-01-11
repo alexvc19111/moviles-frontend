@@ -30,8 +30,13 @@ import EditarPerfil from "../screens/Admin/EditarPerfil";
 
 //Profesor
 import HomeProfesorScreen from "../screens/Profesor/HomeProfesorScreen";
-
-
+import CalificarTareasScreen from "../screens/Profesor/CalificarTareasScreen";
+import EnviarComunicadoScreen from "../screens/Profesor/EnviarComunicadoScreen";
+import HorarioProfesorScreen from "../screens/Profesor/HorarioProfesorScreen";
+import ListaAlumnosScreen from "../screens/Profesor/ListaAlumnosScreen";
+import NuevaTareaScreen from "../screens/Profesor/NuevaTareaScreen";
+import SubirCalificacionesScreen from "../screens/Profesor/SubirCalificacionesScreen";
+import TomarAsistenciaScreen from "../screens/Profesor/TomarAsistenciaScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -54,7 +59,13 @@ export default function AppNavigator() {
       
    {/* PROFESOR */}
    <Stack.Screen name="HomeProfesor" component={HomeProfesorScreen} />
-
+   <Stack.Screen name="CalificarTarea" component={CalificarTareasScreen} />
+   <Stack.Screen name="EnviarComunicado" component={EnviarComunicadoScreen} />
+   <Stack.Screen name="HorarioProfesor" component={HorarioProfesorScreen} />
+   <Stack.Screen name="ListaAlumno" component={ListaAlumnosScreen} />
+   <Stack.Screen name="NuevasTareas" component={NuevaTareaScreen} />
+   <Stack.Screen name="SubirCalificaciones" component={SubirCalificacionesScreen} />
+   <Stack.Screen name="TomarAsistencia" component={TomarAsistenciaScreen} />
 
       {/* ADMIN */}
       <Stack.Screen name="HomeAdmin" component={HomeScreenAdmin} />
