@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 
 export default function ConfiguracionScreen({ navigation }) {
   const [settings, setSettings] = useState({
@@ -71,7 +71,7 @@ export default function ConfiguracionScreen({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#333" />
+          <WebIcon name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Configuración del Sistema</Text>
         <TouchableOpacity 
@@ -86,7 +86,7 @@ export default function ConfiguracionScreen({ navigation }) {
         {/* Sección: Sistema */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="cog" size={20} color="#007bff" />
+            <WebIcon name="cog" size={20} color="#007bff" />
             <Text style={styles.sectionTitle}>Sistema</Text>
           </View>
           
@@ -139,7 +139,7 @@ export default function ConfiguracionScreen({ navigation }) {
         {/* Sección: Seguridad */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="shield" size={20} color="#28a745" />
+            <WebIcon name="shield" size={20} color="#28a745" />
             <Text style={styles.sectionTitle}>Seguridad</Text>
           </View>
           
@@ -192,7 +192,7 @@ export default function ConfiguracionScreen({ navigation }) {
         {/* Sección: Académico */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="school" size={20} color="#FF9800" />
+            <WebIcon name="school" size={20} color="#FF9800" />
             <Text style={styles.sectionTitle}>Académico</Text>
           </View>
           
@@ -236,7 +236,7 @@ export default function ConfiguracionScreen({ navigation }) {
         {/* Sección: Notificaciones por Email */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="email" size={20} color="#9C27B0" />
+            <WebIcon name="email" size={20} color="#9C27B0" />
             <Text style={styles.sectionTitle}>Notificaciones por Email</Text>
           </View>
           
@@ -289,13 +289,13 @@ export default function ConfiguracionScreen({ navigation }) {
         {/* Sección: Acciones del Sistema */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Icon name="backup-restore" size={20} color="#607D8B" />
+            <WebIcon name="backup-restore" size={20} color="#607D8B" />
             <Text style={styles.sectionTitle}>Acciones del Sistema</Text>
           </View>
           
           <TouchableOpacity style={styles.actionButton} onPress={handleBackup}>
             <View style={styles.actionIcon}>
-              <Icon name="database-export" size={24} color="#007bff" />
+              <WebIcon name="database-export" size={24} color="#007bff" />
             </View>
             <View style={styles.actionInfo}>
               <Text style={styles.actionTitle}>Copia de Seguridad</Text>
@@ -303,12 +303,12 @@ export default function ConfiguracionScreen({ navigation }) {
                 Crea un respaldo completo del sistema
               </Text>
             </View>
-            <Icon name="chevron-right" size={24} color="#666" />
+            <WebIcon name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={handleRestore}>
             <View style={styles.actionIcon}>
-              <Icon name="database-restore" size={24} color="#28a745" />
+              <WebIcon name="database-restore" size={24} color="#28a745" />
             </View>
             <View style={styles.actionInfo}>
               <Text style={styles.actionTitle}>Restaurar Sistema</Text>
@@ -316,12 +316,12 @@ export default function ConfiguracionScreen({ navigation }) {
                 Restaura valores por defecto
               </Text>
             </View>
-            <Icon name="chevron-right" size={24} color="#666" />
+            <WebIcon name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton}>
             <View style={styles.actionIcon}>
-              <Icon name="file-document" size={24} color="#FF9800" />
+              <WebIcon name="file-document" size={24} color="#FF9800" />
             </View>
             <View style={styles.actionInfo}>
               <Text style={styles.actionTitle}>Registros del Sistema</Text>
@@ -329,14 +329,14 @@ export default function ConfiguracionScreen({ navigation }) {
                 Ver logs y actividades del sistema
               </Text>
             </View>
-            <Icon name="chevron-right" size={24} color="#666" />
+            <WebIcon name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
         </View>
 
         {/* Información del Sistema */}
         <View style={styles.infoCard}>
           <View style={styles.infoHeader}>
-            <Icon name="information" size={24} color="#007bff" />
+            <WebIcon name="information" size={24} color="#007bff" />
             <Text style={styles.infoTitle}>Información del Sistema</Text>
           </View>
           <View style={styles.infoRow}>

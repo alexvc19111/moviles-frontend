@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, Image, ActivityIndicator} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HomeAlumnoScreen({ navigation, route }) {
   const { user } = route.params || { name: "Usuario", role: "alumno" };
   const [refreshing, setRefreshing] = useState(false);
-  
 
   // Datos de ejemplo con imágenes
   const [dashboardData, setDashboardData] = useState({
@@ -100,24 +99,12 @@ export default function HomeAlumnoScreen({ navigation, route }) {
     }, 1500);
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Cerrar Sesión",
-      "¿Estás seguro de que quieres salir?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, salir",
-          style: "destructive",
-          onPress: () => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
-          },
-        },
-      ]
-    );
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem("userToken");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Login" }],
+    });
   };
 
   // Navegar a pantalla de perfil
@@ -191,40 +178,22 @@ export default function HomeAlumnoScreen({ navigation, route }) {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <TouchableOpacity 
-        style={styles.userInfo}
-        onPress={navigateToProfile}
-        activeOpacity={0.7}
-      >
+      <View style={styles.userInfo}>
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
-            <Icon name="account-school" size={32} color="#fff" />
+            <Text style={styles.avatarText}>👤</Text>
           </View>
-          {user.role === "alumno" && (
-            <View style={styles.roleBadge}>
-              <Icon name="school" size={12} color="#fff" />
-            </View>
-          )}
         </View>
 
         <View style={styles.userDetails}>
           <Text style={styles.welcomeText}>¡Hola de nuevo!</Text>
           <Text style={styles.userName}>{user.name}</Text>
-          <View style={styles.userRoleContainer}>
-            <Icon
-              name={user.role === "alumno" ? "school" : "teach"}
-              size={14}
-              color="#666"
-            />
-            <Text style={styles.userRole}>
-              {user.role === "alumno" ? "Estudiante" : "Profesor"}
-            </Text>
-          </View>
+          <Text style={styles.userRole}>Estudiante</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Icon name="logout" size={24} color="#FF6B6B" />
+        <Text style={styles.logoutButtonText}>✕ Salir</Text>
       </TouchableOpacity>
     </View>
   );
@@ -238,7 +207,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
         activeOpacity={0.8}
       >
         <View style={styles.statIconContainer}>
-          <Icon name="chart-line" size={28} color="#4CAF50" />
+          <Text style={{ fontSize: 28, color: "#4CAF50" }}>📈</Text>
         </View>
         <Text style={styles.statValue}>{dashboardData.promedio.toFixed(1)}</Text>
         <Text style={styles.statLabel}>Promedio</Text>
@@ -248,11 +217,11 @@ export default function HomeAlumnoScreen({ navigation, route }) {
       {/* ASISTENCIA - Enlace a AsistenciasScreen */}
       <TouchableOpacity 
         style={[styles.statCard, { backgroundColor: "#E3F2FD" }]}
-        onPress={navigateToAsistencias}  // ← CAMBIO AQUÍ
+        onPress={navigateToAsistencias}
         activeOpacity={0.8}
       >
         <View style={styles.statIconContainer}>
-          <Icon name="calendar-check" size={28} color="#2196F3" />
+          <Text style={{ fontSize: 28, color: "#2196F3" }}>✓</Text>
         </View>
         <Text style={styles.statValue}>{dashboardData.asistencias}%</Text>
         <Text style={styles.statLabel}>Asistencia</Text>
@@ -262,11 +231,11 @@ export default function HomeAlumnoScreen({ navigation, route }) {
       {/* MATERIAS - Enlace a MateriasScreen */}
       <TouchableOpacity 
         style={[styles.statCard, { backgroundColor: "#FFF3E0" }]}
-        onPress={navigateToMaterias}  // ← CAMBIO AQUÍ
+        onPress={navigateToMaterias}
         activeOpacity={0.8}
       >
         <View style={styles.statIconContainer}>
-          <Icon name="book-open-variant" size={28} color="#FF9800" />
+          <Text style={{ fontSize: 28, color: "#FF9800" }}>📚</Text>
         </View>
         <Text style={styles.statValue}>{dashboardData.materias.length}</Text>
         <Text style={styles.statLabel}>Materias</Text>
@@ -289,11 +258,11 @@ export default function HomeAlumnoScreen({ navigation, route }) {
         <TouchableOpacity 
           key={materia.id} 
           style={styles.materiaItem}
-          onPress={() => navigateToHorario(materia)}  // Ver horario de esta materia
+          onPress={() => navigateToHorario(materia)}
           activeOpacity={0.7}
         >
           <View style={[styles.materiaIcon, { backgroundColor: materia.color }]}>
-            <Icon name={materia.icon} size={22} color="#fff" />
+            <Text style={{ fontSize: 22, color: "#fff" }}>📖</Text>
           </View>
           <View style={styles.materiaInfo}>
             <Text style={styles.materiaNombre}>{materia.nombre}</Text>
@@ -301,7 +270,6 @@ export default function HomeAlumnoScreen({ navigation, route }) {
             <Text style={styles.materiaCodigo}>{materia.codigo} • {materia.aula}</Text>
           </View>
           <View style={styles.materiaActions}>
-            {/* Ver calificaciones de esta materia */}
             <TouchableOpacity 
               style={styles.materiaActionButton}
               onPress={(e) => {
@@ -309,9 +277,8 @@ export default function HomeAlumnoScreen({ navigation, route }) {
                 navigateToCalificaciones(materia);
               }}
             >
-              <Icon name="chart-box" size={20} color="#4CAF50" />
+              <Text style={{ fontSize: 20, color: "#4CAF50" }}>📊</Text>
             </TouchableOpacity>
-            {/* Ver horario de esta materia */}
             <TouchableOpacity 
               style={styles.materiaActionButton}
               onPress={(e) => {
@@ -319,7 +286,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
                 navigateToHorario(materia);
               }}
             >
-              <Icon name="clock-outline" size={20} color="#2196F3" />
+              <Text style={{ fontSize: 20, color: "#2196F3" }}>🕐</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -348,17 +315,15 @@ export default function HomeAlumnoScreen({ navigation, route }) {
           activeOpacity={0.7}
         >
           <View style={styles.calLeft}>
-            <Icon name="file-document" size={20} color="#666" />
+            <Text style={{ fontSize: 20, color: "#666" }}>📄</Text>
             <Text style={styles.calMateria}>{cal.materia}</Text>
           </View>
           <View style={styles.calRight}>
             <View style={styles.calNotaContainer}>
               <Text style={styles.calNota}>{cal.calificacion.toFixed(1)}</Text>
-              <Icon
-                name={cal.tendencia === "up" ? "trending-up" : "trending-down"}
-                size={16}
-                color={cal.tendencia === "up" ? "#4CAF50" : "#F44336"}
-              />
+              <Text style={{ fontSize: 16, color: cal.tendencia === "up" ? "#4CAF50" : "#F44336" }}>
+                {cal.tendencia === "up" ? "↗" : "↘"}
+              </Text>
             </View>
             <Text style={styles.calFecha}>{cal.fecha}</Text>
           </View>
@@ -372,7 +337,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Avisos Recientes</Text>
         <TouchableOpacity>
-          <Icon name="bell-outline" size={22} color="#666" />
+          <Text style={{ fontSize: 22, color: "#666" }}>🔔</Text>
         </TouchableOpacity>
       </View>
 
@@ -395,23 +360,19 @@ export default function HomeAlumnoScreen({ navigation, route }) {
               },
             ]}
           >
-            <Icon
-              name={
-                aviso.tipo === "urgente"
-                  ? "alert"
-                  : aviso.tipo === "académico"
-                  ? "book"
-                  : "calendar-star"
-              }
-              size={20}
-              color={
-                aviso.tipo === "urgente"
-                  ? "#F44336"
-                  : aviso.tipo === "académico"
-                  ? "#4CAF50"
-                  : "#2196F3"
-              }
-            />
+            <Text
+              style={{
+                fontSize: 20,
+                color:
+                  aviso.tipo === "urgente"
+                    ? "#F44336"
+                    : aviso.tipo === "académico"
+                    ? "#4CAF50"
+                    : "#2196F3"
+              }}
+            >
+              {aviso.tipo === "urgente" ? "⚠" : aviso.tipo === "académico" ? "📖" : "📅"}
+            </Text>
           </View>
           <View style={styles.avisoContent}>
             <Text style={styles.avisoTitulo}>{aviso.titulo}</Text>
@@ -434,7 +395,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
           activeOpacity={0.7}
         >
           <View style={[styles.actionIcon, { backgroundColor: "#FFE0B2" }]}>
-            <Icon name="calendar-clock" size={24} color="#FF9800" />
+            <Text style={{ fontSize: 24, color: "#FF9800" }}>📅</Text>
           </View>
           <Text style={styles.actionText}>Horario</Text>
         </TouchableOpacity>
@@ -446,7 +407,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
           activeOpacity={0.7}
         >
           <View style={[styles.actionIcon, { backgroundColor: "#C8E6C9" }]}>
-            <Icon name="file-document-multiple" size={24} color="#4CAF50" />
+            <Text style={{ fontSize: 24, color: "#4CAF50" }}>📋</Text>
           </View>
           <Text style={styles.actionText}>Calificaciones</Text>
         </TouchableOpacity>
@@ -458,7 +419,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
           activeOpacity={0.7}
         >
           <View style={[styles.actionIcon, { backgroundColor: "#BBDEFB" }]}>
-            <Icon name="account" size={24} color="#2196F3" />
+            <Text style={{ fontSize: 24, color: "#2196F3" }}>👤</Text>
           </View>
           <Text style={styles.actionText}>Perfil</Text>
         </TouchableOpacity>
@@ -466,11 +427,11 @@ export default function HomeAlumnoScreen({ navigation, route }) {
         {/* AJUSTES - Enlace a AjustesScreen */}
         <TouchableOpacity 
           style={styles.actionButton}
-          onPress={navigateToAjustes}  // ← CAMBIO AQUÍ
+          onPress={navigateToAjustes}
           activeOpacity={0.7}
         >
           <View style={[styles.actionIcon, { backgroundColor: "#E1BEE7" }]}>
-            <Icon name="cog" size={24} color="#9C27B0" />
+            <Text style={{ fontSize: 24, color: "#9C27B0" }}>⚙</Text>
           </View>
           <Text style={styles.actionText}>Ajustes</Text>
         </TouchableOpacity>
@@ -496,7 +457,7 @@ export default function HomeAlumnoScreen({ navigation, route }) {
 
         <View style={styles.footer}>
           <View style={styles.footerContent}>
-            <Icon name="school" size={40} color="#E0E0E0" />
+            <Text style={{ fontSize: 40, color: "#E0E0E0" }}>🏫</Text>
             <Text style={styles.footerText}>Sistema Escolar v2.0</Text>
             <Text style={styles.footerSubtext}>© 2024 - Todos los derechos reservados</Text>
           </View>
@@ -548,6 +509,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
+  avatarText: {
+    fontSize: 32,
+    color: "#fff",
+  },
   roleBadge: {
     position: "absolute",
     bottom: 0,
@@ -586,14 +551,24 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   logoutButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "#FFF5F5",
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#FFEBEE",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#FF6B6B",
+    justifyContent: "center",
+    shadowColor: "#FF6B6B",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    marginLeft: 5,
   },
   statsContainer: {
     flexDirection: "row",

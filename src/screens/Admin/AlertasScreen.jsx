@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {SafeAreaView, View, Text, StyleSheet,ScrollView, TouchableOpacity, FlatList, Alert, Switch, RefreshControl} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 import { getShadowStyle } from "../../utils/shadowStyles";
 
 export default function AlertasScreen({ navigation }) {
@@ -188,19 +188,19 @@ export default function AlertasScreen({ navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#333" />
+        <WebIcon name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Alertas del Sistema</Text>
         <View style={styles.headerStats}>
           <View style={styles.statBadge}>
-            <Icon name="alert-circle" size={14} color="#F44336" />
+            <WebIcon name="alert-circle" size={14} color="#F44336" />
             <Text style={styles.statText}>
               {alertas.filter(a => a.nivel === "alto").length} Altas
             </Text>
           </View>
           <View style={styles.statBadge}>
-            <Icon name="alert" size={14} color="#FF9800" />
+            <WebIcon name="alert" size={14} color="#FF9800" />
             <Text style={styles.statText}>
               {alertas.filter(a => !a.leida).length} No leídas
             </Text>
@@ -211,7 +211,7 @@ export default function AlertasScreen({ navigation }) {
         style={styles.headerButton}
         onPress={marcarTodasComoLeidas}
       >
-        <Icon name="check-all" size={24} color="#4CAF50" />
+        <WebIcon name="check-all" size={24} color="#4CAF50" />
       </TouchableOpacity>
     </View>
   );
@@ -262,7 +262,7 @@ export default function AlertasScreen({ navigation }) {
         ]}
         onPress={() => setFiltros(prev => ({ ...prev, noLeidas: !prev.noLeidas }))}
       >
-        <Icon name="email-outline" size={16} color="#666" />
+        <WebIcon name="email-outline" size={16} color="#666" />
         <Text style={styles.filtroButtonText}>No leídas</Text>
       </TouchableOpacity>
 
@@ -273,7 +273,7 @@ export default function AlertasScreen({ navigation }) {
         ]}
         onPress={() => setFiltros(prev => ({ ...prev, tipoAcademico: !prev.tipoAcademico }))}
       >
-        <Icon name="school" size={16} color="#666" />
+        <WebIcon name="school" size={16} color="#666" />
         <Text style={styles.filtroButtonText}>Académico</Text>
       </TouchableOpacity>
 
@@ -284,7 +284,7 @@ export default function AlertasScreen({ navigation }) {
         ]}
         onPress={() => setFiltros(prev => ({ ...prev, tipoSistema: !prev.tipoSistema }))}
       >
-        <Icon name="server" size={16} color="#666" />
+        <WebIcon name="server" size={16} color="#666" />
         <Text style={styles.filtroButtonText}>Sistema</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -313,7 +313,7 @@ export default function AlertasScreen({ navigation }) {
       }
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
-          <Icon name="bell-off" size={50} color="#ccc" />
+          <WebIcon name="bell-off" size={50} color="#ccc" />
           <Text style={styles.emptyText}>No hay alertas con los filtros seleccionados</Text>
         </View>
       }
@@ -338,7 +338,7 @@ export default function AlertasScreen({ navigation }) {
             <View style={styles.alertaInfo}>
               <Text style={styles.alertaTitulo}>{item.titulo}</Text>
               <Text style={styles.alertaFecha}>
-                <Icon name="clock-outline" size={12} color="#999" />
+                <WebIcon name="clock-outline" size={12} color="#999" />
                 {" "}{item.fecha}
               </Text>
             </View>
@@ -364,7 +364,7 @@ export default function AlertasScreen({ navigation }) {
                   style={styles.accionButton}
                   onPress={() => handleAccionAlerta(item)}
                 >
-                  <Icon name="arrow-right-circle" size={18} color="#2196F3" />
+                  <WebIcon name="arrow-right-circle" size={18} color="#2196F3" />
                   <Text style={styles.accionButtonText}>Tomar acción</Text>
                 </TouchableOpacity>
               )}
@@ -374,7 +374,7 @@ export default function AlertasScreen({ navigation }) {
                   style={styles.accionButton}
                   onPress={() => marcarComoLeida(item.id)}
                 >
-                  <Icon name="check" size={18} color="#4CAF50" />
+                  <WebIcon name="check" size={18} color="#4CAF50" />
                   <Text style={styles.accionButtonText}>Marcar leída</Text>
                 </TouchableOpacity>
               )}
@@ -384,7 +384,7 @@ export default function AlertasScreen({ navigation }) {
               style={styles.eliminarButton}
               onPress={() => eliminarAlerta(item.id)}
             >
-              <Icon name="delete-outline" size={18} color="#F44336" />
+              <WebIcon name="delete-outline" size={18} color="#F44336" />
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -396,7 +396,7 @@ export default function AlertasScreen({ navigation }) {
     <View style={[styles.resumenContainer, getShadowStyle()]}>
       <View style={styles.resumenItem}>
         <View style={[styles.resumenIcon, { backgroundColor: "#FFEBEE" }]}>
-          <Icon name="alert-circle" size={24} color="#F44336" />
+          <WebIcon name="alert-circle" size={24} color="#F44336" />
         </View>
         <View style={styles.resumenInfo}>
           <Text style={styles.resumenValue}>
@@ -408,7 +408,7 @@ export default function AlertasScreen({ navigation }) {
 
       <View style={styles.resumenItem}>
         <View style={[styles.resumenIcon, { backgroundColor: "#FFF3E0" }]}>
-          <Icon name="alert" size={24} color="#FF9800" />
+          <WebIcon name="alert" size={24} color="#FF9800" />
         </View>
         <View style={styles.resumenInfo}>
           <Text style={styles.resumenValue}>
@@ -420,7 +420,7 @@ export default function AlertasScreen({ navigation }) {
 
       <View style={styles.resumenItem}>
         <View style={[styles.resumenIcon, { backgroundColor: "#E8F5E9" }]}>
-          <Icon name="server" size={24} color="#4CAF50" />
+          <WebIcon name="server" size={24} color="#4CAF50" />
         </View>
         <View style={styles.resumenInfo}>
           <Text style={styles.resumenValue}>
@@ -441,7 +441,7 @@ export default function AlertasScreen({ navigation }) {
         {renderListaAlertas()}
 
         <View style={styles.infoContainer}>
-          <Icon name="information" size={20} color="#2196F3" />
+          <WebIcon name="information" size={20} color="#2196F3" />
           <Text style={styles.infoText}>
             Mantén presionada una alerta para eliminarla
           </Text>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {SafeAreaView, View, Text, StyleSheet,
   ScrollView, TouchableOpacity, Alert} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import WebIcon from "../../components/WebIcon";
 
 export default function AsistenciasScreen({ navigation, route }) {
   // Manejo SEGURO de parámetros - NO USAR destructuring directamente
@@ -79,7 +79,7 @@ export default function AsistenciasScreen({ navigation, route }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#fff" />
+        <WebIcon name="arrow-left" size={24} color="#fff" />
       </TouchableOpacity>
       
       <Text style={styles.headerTitle}>Asistencias</Text>
@@ -88,7 +88,7 @@ export default function AsistenciasScreen({ navigation, route }) {
         style={styles.downloadButton}
         onPress={() => Alert.alert("Descargar", "Descargando reporte de asistencias...")}
       >
-        <Icon name="download" size={22} color="#fff" />
+        <WebIcon name="download" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -99,7 +99,7 @@ export default function AsistenciasScreen({ navigation, route }) {
       
       <View style={styles.resumenStats}>
         <View style={styles.statItem}>
-          <Icon name="check-circle" size={28} color="#4CAF50" />
+          <WebIcon name="check-circle" size={28} color="#4CAF50" />
           <Text style={styles.statValue}>{asistenciasData.promedioAsistencia}%</Text>
           <Text style={styles.statLabel}>Promedio</Text>
         </View>
@@ -107,7 +107,7 @@ export default function AsistenciasScreen({ navigation, route }) {
         <View style={styles.statDivider} />
         
         <View style={styles.statItem}>
-          <Icon name="calendar-check" size={28} color="#2196F3" />
+          <WebIcon name="calendar-check" size={28} color="#2196F3" />
           <Text style={styles.statValue}>{asistenciasData.asistencias}</Text>
           <Text style={styles.statLabel}>Asistencias</Text>
         </View>
@@ -115,7 +115,7 @@ export default function AsistenciasScreen({ navigation, route }) {
         <View style={styles.statDivider} />
         
         <View style={styles.statItem}>
-          <Icon name="calendar-remove" size={28} color="#F44336" />
+          <WebIcon name="calendar-remove" size={28} color="#F44336" />
           <Text style={styles.statValue}>{asistenciasData.faltas}</Text>
           <Text style={styles.statLabel}>Faltas</Text>
         </View>
@@ -144,15 +144,15 @@ export default function AsistenciasScreen({ navigation, route }) {
             <Text style={styles.materiaProfesor}>{materia.profesor}</Text>
             <View style={styles.materiaStats}>
               <View style={styles.miniStat}>
-                <Icon name="check" size={12} color="#4CAF50" />
+                <WebIcon name="check" size={12} color="#4CAF50" />
                 <Text style={styles.miniStatText}>{materia.asistencias}</Text>
               </View>
               <View style={styles.miniStat}>
-                <Icon name="close" size={12} color="#F44336" />
+                <WebIcon name="close" size={12} color="#F44336" />
                 <Text style={styles.miniStatText}>{materia.faltas}</Text>
               </View>
               <View style={styles.miniStat}>
-                <Icon name="clock-alert" size={12} color="#FF9800" />
+                <WebIcon name="clock-alert" size={12} color="#FF9800" />
                 <Text style={styles.miniStatText}>{materia.retardos}</Text>
               </View>
             </View>
@@ -189,7 +189,7 @@ export default function AsistenciasScreen({ navigation, route }) {
               { backgroundColor: item.estado === "Asistió" ? "#E8F5E9" : 
                                  item.estado === "Retardo" ? "#FFF3E0" : "#FFEBEE" }
             ]}>
-              <Icon 
+              <WebIcon 
                 name={item.estado === "Asistió" ? "check" : 
                       item.estado === "Retardo" ? "clock" : "close"} 
                 size={16} 

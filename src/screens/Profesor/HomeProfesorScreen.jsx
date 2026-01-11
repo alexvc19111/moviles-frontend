@@ -11,7 +11,6 @@ import {
   StatusBar,
   Platform
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeProfesorScreen = ({ navigation }) => {
@@ -69,6 +68,11 @@ const HomeProfesorScreen = ({ navigation }) => {
     }, 1500);
   };
 
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('userToken');
+    navigation.replace('Login');
+  };
+
   const handleCardPress = (tipo) => {
     Alert.alert('Navegar', `Ir a ${tipo}`);
   };
@@ -106,7 +110,7 @@ const HomeProfesorScreen = ({ navigation }) => {
             style={styles.avatarContainer}
             onPress={() => Alert.alert('Perfil', 'Ver perfil del profesor')}
           >
-            <Icon name="account-tie" size={40} color="#2196F3" />
+            <Text style={{ fontSize: 40, color: '#2196F3' }}>👨‍🏫</Text>
           </TouchableOpacity>
           <View>
             <Text style={[styles.greeting, textStyle]}>
@@ -115,15 +119,23 @@ const HomeProfesorScreen = ({ navigation }) => {
             <Text style={[styles.date, subtextStyle]}>{fechaActual}</Text>
           </View>
         </View>
-        <TouchableOpacity 
-          style={styles.notificationButton}
-          onPress={() => Alert.alert('Notificaciones', 'Tienes 3 notificaciones nuevas')}
-        >
-          <Icon name="bell-outline" size={24} color="#666" />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationCount}>3</Text>
-          </View>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity 
+            style={styles.notificationButton}
+            onPress={() => Alert.alert('Notificaciones', 'Tienes 3 notificaciones nuevas')}
+          >
+            <Text style={{ fontSize: 24, color: '#666' }}>🔔</Text>
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationCount}>3</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
+            <Text style={styles.logoutButtonText}>✕ Salir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView 
@@ -144,10 +156,10 @@ const HomeProfesorScreen = ({ navigation }) => {
           <View style={styles.statsContainer}>
             <TouchableOpacity 
               style={[styles.statCard, cardStyle]}
-              onPress={() => handleCardPress('alumnos')}
+              onPress={() => navigation.navigate('ListaAlumnos')}
             >
               <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
-                <Icon name="account-multiple" size={24} color="#2196F3" />
+                <Text style={{ fontSize: 24, color: '#2196F3' }}>👥</Text>
               </View>
               <Text style={[styles.statNumber, textStyle]}>{estadisticas.totalAlumnos}</Text>
               <Text style={[styles.statLabel, subtextStyle]}>Alumnos</Text>
@@ -158,7 +170,7 @@ const HomeProfesorScreen = ({ navigation }) => {
               onPress={() => handleCardPress('clases')}
             >
               <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
-                <Icon name="calendar-clock" size={24} color="#4CAF50" />
+                <Text style={{ fontSize: 24, color: '#4CAF50' }}>📅</Text>
               </View>
               <Text style={[styles.statNumber, textStyle]}>{estadisticas.clasesHoy}</Text>
               <Text style={[styles.statLabel, subtextStyle]}>Clases Hoy</Text>
@@ -169,7 +181,7 @@ const HomeProfesorScreen = ({ navigation }) => {
               onPress={() => handleCardPress('tareas')}
             >
               <View style={[styles.statIcon, { backgroundColor: '#FFF3E0' }]}>
-                <Icon name="clipboard-check" size={24} color="#FF9800" />
+                <Text style={{ fontSize: 24, color: '#FF9800' }}>📋</Text>
               </View>
               <Text style={[styles.statNumber, textStyle]}>{estadisticas.tareasPendientes}</Text>
               <Text style={[styles.statLabel, subtextStyle]}>Tareas Pendientes</Text>
@@ -181,7 +193,7 @@ const HomeProfesorScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, textStyle]}>Clases de Hoy</Text>
-            <TouchableOpacity onPress={() => Alert.alert('Horario', 'Ver horario completo')}>
+            <TouchableOpacity onPress={() => navigation.navigate('HorarioProfesor')}>
               <Text style={[styles.seeAll, { color: '#2196F3' }]}>Ver Horario</Text>
             </TouchableOpacity>
           </View>
@@ -200,16 +212,16 @@ const HomeProfesorScreen = ({ navigation }) => {
                 <View style={[styles.claseColor, { backgroundColor: clase.color }]} />
                 <Text style={[styles.claseMateria, textStyle]}>{clase.materia}</Text>
                 <View style={styles.claseInfo}>
-                  <Icon name="clock-outline" size={14} color="#757575" />
+                  <Text style={{ fontSize: 14, color: '#757575' }}>🕐</Text>
                   <Text style={[styles.claseHora, subtextStyle]}>{clase.hora}</Text>
                 </View>
                 <View style={styles.claseInfo}>
-                  <Icon name="map-marker" size={14} color="#757575" />
+                  <Text style={{ fontSize: 14, color: '#757575' }}>📍</Text>
                   <Text style={[styles.claseAula, subtextStyle]}>{clase.aula}</Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.claseButton}
-                  onPress={() => Alert.alert('Asistencia', `Tomar asistencia para ${clase.materia}`)}
+                  onPress={() => navigation.navigate('TomarAsistencia')}
                 >
                   <Text style={styles.claseButtonText}>Tomar Asistencia</Text>
                 </TouchableOpacity>
@@ -235,7 +247,7 @@ const HomeProfesorScreen = ({ navigation }) => {
             >
               <View style={styles.tareaHeader}>
                 <View style={styles.tareaLeft}>
-                  <Icon name="clipboard-text" size={24} color="#2196F3" />
+                  <Text style={{ fontSize: 24, color: '#2196F3' }}>📋</Text>
                   <View style={styles.tareaInfo}>
                     <Text style={[styles.tareaTitulo, textStyle]}>{tarea.titulo}</Text>
                     <Text style={[styles.tareaMateria, subtextStyle]}>{tarea.materia}</Text>
@@ -243,7 +255,7 @@ const HomeProfesorScreen = ({ navigation }) => {
                 </View>
                 <View style={styles.tareaFechaContainer}>
                   <Text style={[styles.tareaFecha, subtextStyle]}>{tarea.fecha}</Text>
-                  <Icon name="calendar" size={14} color="#757575" />
+                  <Text style={{ fontSize: 14, color: '#757575' }}>📅</Text>
                 </View>
               </View>
               
@@ -264,9 +276,9 @@ const HomeProfesorScreen = ({ navigation }) => {
               <View style={styles.tareaActions}>
                 <TouchableOpacity 
                   style={[styles.actionButton, styles.calificarButton]}
-                  onPress={() => Alert.alert('Calificar', `Calificar ${tarea.titulo}`)}
+                  onPress={() => navigation.navigate('CalificarTareas')}
                 >
-                  <Icon name="pencil" size={16} color="#FFFFFF" />
+                  <Text style={{ fontSize: 16, color: '#FFFFFF' }}>✏️</Text>
                   <Text style={styles.actionButtonText}>Calificar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -295,22 +307,20 @@ const HomeProfesorScreen = ({ navigation }) => {
                 { backgroundColor: anuncio.tipo === 'reunion' ? '#2196F3' : 
                                  anuncio.tipo === 'capacitacion' ? '#4CAF50' : '#FF9800' }
               ]}>
-                <Icon 
-                  name={anuncio.tipo === 'reunion' ? 'account-group' : 
-                       anuncio.tipo === 'capacitacion' ? 'school' : 'alert-circle'} 
-                  size={20} 
-                  color="#FFFFFF" 
-                />
+                <Text style={{ fontSize: 20, color: '#FFFFFF' }}>
+                  {anuncio.tipo === 'reunion' ? '👥' : 
+                   anuncio.tipo === 'capacitacion' ? '🏫' : '⚠️'}
+                </Text>
               </View>
               <View style={styles.anuncioContent}>
                 <Text style={[styles.anuncioTitulo, textStyle]}>{anuncio.titulo}</Text>
                 <Text style={[styles.anuncioDesc, subtextStyle]}>{anuncio.descripcion}</Text>
                 <View style={styles.anuncioFecha}>
-                  <Icon name="clock-outline" size={12} color="#757575" />
+                  <Text style={{ fontSize: 12, color: '#757575' }}>🕒</Text>
                   <Text style={[styles.anuncioFechaText, subtextStyle]}>{anuncio.fecha}</Text>
                 </View>
               </View>
-              <Icon name="chevron-right" size={20} color="#757575" />
+              <Text style={{ fontSize: 20, color: '#757575' }}>›</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -321,40 +331,40 @@ const HomeProfesorScreen = ({ navigation }) => {
           <View style={styles.actionsGrid}>
             <TouchableOpacity 
               style={[styles.actionCard, cardStyle]}
-              onPress={() => Alert.alert('Nueva Tarea', 'Crear nueva tarea')}
+              onPress={() => navigation.navigate('NuevaTarea')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#E3F2FD' }]}>
-                <Icon name="plus-circle" size={28} color="#2196F3" />
+                <Text style={{ fontSize: 28, color: '#2196F3' }}>➕</Text>
               </View>
               <Text style={[styles.actionText, textStyle]}>Nueva Tarea</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.actionCard, cardStyle]}
-              onPress={() => Alert.alert('Asistencia', 'Registrar asistencia')}
+              onPress={() => navigation.navigate('TomarAsistencia')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#E8F5E9' }]}>
-                <Icon name="clipboard-check" size={28} color="#4CAF50" />
+                <Text style={{ fontSize: 28, color: '#4CAF50' }}>✔️</Text>
               </View>
               <Text style={[styles.actionText, textStyle]}>Registrar Asistencia</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.actionCard, cardStyle]}
-              onPress={() => Alert.alert('Calificaciones', 'Subir calificaciones')}
+              onPress={() => navigation.navigate('SubirCalificaciones')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#FFF3E0' }]}>
-                <Icon name="upload" size={28} color="#FF9800" />
+                <Text style={{ fontSize: 28, color: '#FF9800' }}>⬆️</Text>
               </View>
               <Text style={[styles.actionText, textStyle]}>Subir Calificaciones</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.actionCard, cardStyle]}
-              onPress={() => Alert.alert('Comunicados', 'Enviar comunicado')}
+              onPress={() => navigation.navigate('EnviarComunicado')}
             >
               <View style={[styles.actionIcon, { backgroundColor: '#F3E5F5' }]}>
-                <Icon name="email" size={28} color="#9C27B0" />
+                <Text style={{ fontSize: 28, color: '#9C27B0' }}>✉️</Text>
               </View>
               <Text style={[styles.actionText, textStyle]}>Enviar Comunicado</Text>
             </TouchableOpacity>
@@ -370,7 +380,7 @@ const HomeProfesorScreen = ({ navigation }) => {
         style={styles.floatingButton}
         onPress={() => Alert.alert('Acción Rápida', '¿Qué deseas hacer?')}
       >
-        <Icon name="plus" size={24} color="#FFFFFF" />
+        <Text style={{ fontSize: 24, color: '#FFFFFF' }}>+</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -434,9 +444,30 @@ const styles = StyleSheet.create({
   darkSubtext: {
     color: '#B0B0B0',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   notificationButton: {
     padding: 8,
     position: 'relative',
+  },
+  logoutButton: {
+    backgroundColor: '#F44336',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
   notificationBadge: {
     position: 'absolute',

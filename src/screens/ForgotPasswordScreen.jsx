@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Imag} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image} from "react-native";
+import WebIcon from "../components/WebIcon";
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [step, setStep] = useState(1); // 1: Email, 2: Código, 3: Nueva contraseña

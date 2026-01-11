@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {SafeAreaView, View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Modal, Alert, RefreshControl, ActivityIndicator, ScrollView} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 
 export default function GestionMateriasScreen({ navigation }) {
   const [materias, setMaterias] = useState([]);
@@ -233,13 +233,13 @@ export default function GestionMateriasScreen({ navigation }) {
             style={styles.actionButton}
             onPress={() => openEditModal(item)}
           >
-            <Icon name="pencil" size={20} color="#007bff" />
+            <WebIcon name="pencil" size={20} color="#007bff" />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => handleDeleteMateria(item)}
           >
-            <Icon name="delete" size={20} color="#dc3545" />
+            <WebIcon name="delete" size={20} color="#dc3545" />
           </TouchableOpacity>
         </View>
       </View>
@@ -252,25 +252,25 @@ export default function GestionMateriasScreen({ navigation }) {
       <View style={styles.materiaDetails}>
         <View style={styles.detailRow}>
           <View style={styles.detailItem}>
-            <Icon name="teach" size={16} color="#666" />
+            <WebIcon name="teach" size={16} color="#666" />
             <Text style={styles.detailText}>{item.profesor}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Icon name="account-group" size={16} color="#666" />
+            <WebIcon name="account-group" size={16} color="#666" />
             <Text style={styles.detailText}>{item.alumnosInscritos} alumnos</Text>
           </View>
         </View>
         <View style={styles.detailRow}>
           <View style={styles.detailItem}>
-            <Icon name="school" size={16} color="#666" />
+            <WebIcon name="school" size={16} color="#666" />
             <Text style={styles.detailText}>Semestre {item.semestre}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Icon name="clock-outline" size={16} color="#666" />
+            <WebIcon name="clock-outline" size={16} color="#666" />
             <Text style={styles.detailText}>{item.horasSemana}h/semana</Text>
           </View>
           <View style={styles.detailItem}>
-            <Icon name="credit-card" size={16} color="#666" />
+            <WebIcon name="credit-card" size={16} color="#666" />
             <Text style={styles.detailText}>{item.creditos} créditos</Text>
           </View>
         </View>
@@ -286,21 +286,21 @@ export default function GestionMateriasScreen({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#333" />
+          <WebIcon name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Gestión de Materias</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={openCreateModal}
         >
-          <Icon name="plus" size={24} color="#fff" />
+          <WebIcon name="plus" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Icon name="magnify" size={20} color="#666" style={styles.searchIcon} />
+          <WebIcon name="magnify" size={20} color="#666" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar materias..."
@@ -347,7 +347,7 @@ export default function GestionMateriasScreen({ navigation }) {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Icon name="book-open-variant" size={60} color="#ccc" />
+              <WebIcon name="book-open-variant" size={60} color="#ccc" />
               <Text style={styles.emptyText}>No se encontraron materias</Text>
             </View>
           }
@@ -368,7 +368,7 @@ export default function GestionMateriasScreen({ navigation }) {
                 {modalType === "create" ? "Nueva Materia" : "Editar Materia"}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="close" size={24} color="#666" />
+                <WebIcon name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
 

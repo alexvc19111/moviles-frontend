@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity,  TextInput, Alert} from 'react-native';
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 
 
 export default function PerfilAlumnoScreen({ navigation, route }) {
@@ -57,7 +57,7 @@ export default function PerfilAlumnoScreen({ navigation, route }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#fff" />
+        <WebIcon name="arrow-left" size={24} color="#fff" />
       </TouchableOpacity>
       
       <Text style={styles.headerTitle}>Mi Perfil</Text>
@@ -66,7 +66,7 @@ export default function PerfilAlumnoScreen({ navigation, route }) {
         style={styles.logoutButton}
         onPress={handleLogout}
       >
-        <Icon name="logout" size={22} color="#fff" />
+        <WebIcon name="logout" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -80,10 +80,10 @@ export default function PerfilAlumnoScreen({ navigation, route }) {
         <View style={styles.userHeader}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <Icon name="account-school" size={48} color="#fff" />
+              <WebIcon name="account-school" size={48} color="#fff" />
             </View>
             <TouchableOpacity style={styles.cameraButton}>
-              <Icon name="camera" size={20} color="#fff" />
+              <WebIcon name="camera" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
           <Text style={styles.userName}>{userData.name}</Text>
@@ -94,7 +94,7 @@ export default function PerfilAlumnoScreen({ navigation, route }) {
             style={styles.editProfileButton}
             onPress={() => setEditing(!editing)}
           >
-            <Icon 
+            <WebIcon 
               name={editing ? "close" : "pencil"} 
               size={20} 
               color="#fff" 
@@ -206,12 +206,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#2196F3',
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   headerTitle: {
     fontSize: 20,
@@ -219,12 +224,17 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   logoutButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
   userHeader: {
     alignItems: 'center',

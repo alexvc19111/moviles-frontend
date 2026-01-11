@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 
 export default function BackupScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
@@ -151,7 +151,7 @@ export default function BackupScreen({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#333" />
+          <WebIcon name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Copias de Seguridad</Text>
         <View style={styles.headerPlaceholder} />
@@ -178,7 +178,7 @@ export default function BackupScreen({ navigation }) {
               onPress={() => handleCreateBackup("completo")}
               disabled={loading}
             >
-              <Icon name="database" size={24} color="#fff" />
+              <WebIcon name="database" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Backup Completo</Text>
             </TouchableOpacity>
             
@@ -187,7 +187,7 @@ export default function BackupScreen({ navigation }) {
               onPress={() => handleCreateBackup("bd")}
               disabled={loading}
             >
-              <Icon name="database-search" size={24} color="#fff" />
+              <WebIcon name="database-search" size={24} color="#fff" />
               <Text style={styles.actionButtonText}>Solo Base de Datos</Text>
             </TouchableOpacity>
           </View>
@@ -227,7 +227,7 @@ export default function BackupScreen({ navigation }) {
               <View style={styles.backupHeader}>
                 <View style={styles.backupInfo}>
                   <View style={[styles.backupIcon, { backgroundColor: getBackupColor(backup.tipo) + "20" }]}>
-                    <Icon 
+                    <WebIcon 
                       name={getBackupIcon(backup.tipo)} 
                       size={20} 
                       color={getBackupColor(backup.tipo)} 
@@ -248,12 +248,12 @@ export default function BackupScreen({ navigation }) {
               <View style={styles.backupDetails}>
                 {backup.tamaño !== "-" && (
                   <View style={styles.detailItem}>
-                    <Icon name="harddisk" size={16} color="#666" />
+                    <WebIcon name="harddisk" size={16} color="#666" />
                     <Text style={styles.detailText}>{backup.tamaño}</Text>
                   </View>
                 )}
                 <View style={styles.detailItem}>
-                  <Icon name="calendar" size={16} color="#666" />
+                  <WebIcon name="calendar" size={16} color="#666" />
                   <Text style={styles.detailText}>
                     {backup.tipo === "programado" ? "Programado" : "Completado"}
                   </Text>
@@ -267,7 +267,7 @@ export default function BackupScreen({ navigation }) {
                     onPress={() => handleRestoreBackup(backup)}
                     disabled={loading}
                   >
-                    <Icon name="backup-restore" size={20} color="#007bff" />
+                    <WebIcon name="backup-restore" size={20} color="#007bff" />
                     <Text style={styles.actionBtnText}>Restaurar</Text>
                   </TouchableOpacity>
                 )}
@@ -277,7 +277,7 @@ export default function BackupScreen({ navigation }) {
                   onPress={() => navigation.navigate("BackupDetalle", { backup })}
                   disabled={loading}
                 >
-                  <Icon name="information" size={20} color="#666" />
+                  <WebIcon name="information" size={20} color="#666" />
                   <Text style={styles.actionBtnText}>Detalles</Text>
                 </TouchableOpacity>
                 
@@ -286,7 +286,7 @@ export default function BackupScreen({ navigation }) {
                   onPress={() => handleDeleteBackup(backup)}
                   disabled={loading}
                 >
-                  <Icon name="delete" size={20} color="#F44336" />
+                  <WebIcon name="delete" size={20} color="#F44336" />
                   <Text style={styles.actionBtnText}>Eliminar</Text>
                 </TouchableOpacity>
               </View>
@@ -337,7 +337,7 @@ export default function BackupScreen({ navigation }) {
 
         {/* Información Importante */}
         <View style={styles.infoCard}>
-          <Icon name="alert-circle" size={24} color="#FF9800" />
+          <WebIcon name="alert-circle" size={24} color="#FF9800" />
           <View style={styles.infoContent}>
             <Text style={styles.infoTitle}>Recomendaciones</Text>
             <Text style={styles.infoText}>

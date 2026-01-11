@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {SafeAreaView, View, Text, StyleSheet, FlatList, ScrollView, TouchableOpacity, TextInput, Modal, Alert, RefreshControl, ActivityIndicator} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 
 export default function GestionUsuariosScreen({ navigation }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -235,7 +235,7 @@ export default function GestionUsuariosScreen({ navigation }) {
             style={styles.actionButton}
             onPress={() => toggleUserStatus(item)}
           >
-            <Icon 
+            <WebIcon 
               name={item.estado === "activo" ? "account-off" : "account-check"} 
               size={20} 
               color={item.estado === "activo" ? "#dc3545" : "#28a745"} 
@@ -245,13 +245,13 @@ export default function GestionUsuariosScreen({ navigation }) {
             style={styles.actionButton}
             onPress={() => openEditModal(item)}
           >
-            <Icon name="pencil" size={20} color="#007bff" />
+            <WebIcon name="pencil" size={20} color="#007bff" />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => handleDeleteUser(item)}
           >
-            <Icon name="delete" size={20} color="#dc3545" />
+            <WebIcon name="delete" size={20} color="#dc3545" />
           </TouchableOpacity>
         </View>
       </View>
@@ -262,18 +262,18 @@ export default function GestionUsuariosScreen({ navigation }) {
       <View style={styles.userDetails}>
         {item.matricula && (
           <View style={styles.detailItem}>
-            <Icon name="identifier" size={16} color="#666" />
+            <WebIcon name="identifier" size={16} color="#666" />
             <Text style={styles.detailText}>Matrícula: {item.matricula}</Text>
           </View>
         )}
         {item.telefono && (
           <View style={styles.detailItem}>
-            <Icon name="phone" size={16} color="#666" />
+            <WebIcon name="phone" size={16} color="#666" />
             <Text style={styles.detailText}>Tel: {item.telefono}</Text>
           </View>
         )}
         <View style={styles.detailItem}>
-          <Icon name="calendar" size={16} color="#666" />
+          <WebIcon name="calendar" size={16} color="#666" />
           <Text style={styles.detailText}>Registro: {item.fechaRegistro}</Text>
         </View>
       </View>
@@ -288,21 +288,21 @@ export default function GestionUsuariosScreen({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#333" />
+          <WebIcon name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Gestión de Usuarios</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={openCreateModal}
         >
-          <Icon name="plus" size={24} color="#fff" />
+          <WebIcon name="plus" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       {/* Barra de búsqueda */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Icon name="magnify" size={20} color="#666" style={styles.searchIcon} />
+          <WebIcon name="magnify" size={20} color="#666" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Buscar por nombre, email o matrícula..."
@@ -311,7 +311,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           />
           {searchText.length > 0 && (
             <TouchableOpacity onPress={() => setSearchText("")}>
-              <Icon name="close-circle" size={20} color="#666" />
+              <WebIcon name="close-circle" size={20} color="#666" />
             </TouchableOpacity>
           )}
         </View>
@@ -347,7 +347,7 @@ export default function GestionUsuariosScreen({ navigation }) {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Icon name="account-multiple" size={60} color="#ccc" />
+              <WebIcon name="account-multiple" size={60} color="#ccc" />
               <Text style={styles.emptyText}>No se encontraron usuarios</Text>
               <Text style={styles.emptySubtext}>
                 {searchText ? "Intenta con otros términos de búsqueda" : "Presiona + para agregar un usuario"}
@@ -371,7 +371,7 @@ export default function GestionUsuariosScreen({ navigation }) {
                 {modalType === "create" ? "Nuevo Usuario" : "Editar Usuario"}
               </Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Icon name="close" size={24} color="#666" />
+                <WebIcon name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
 

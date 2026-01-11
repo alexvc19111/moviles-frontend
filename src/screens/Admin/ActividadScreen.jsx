@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {SafeAreaView,View, Text,StyleSheet,ScrollView,TouchableOpacity,FlatList, TextInput,RefreshControl} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 import { getShadowStyle } from "../../utils/shadowStyles";
 
 export default function ActividadScreen({ navigation }) {
@@ -204,7 +204,7 @@ export default function ActividadScreen({ navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#333" />
+        <WebIcon name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Registro de Actividad</Text>
@@ -214,7 +214,7 @@ export default function ActividadScreen({ navigation }) {
         style={styles.exportButton}
         onPress={exportarActividad}
       >
-        <Icon name="export" size={24} color="#2196F3" />
+        <WebIcon name="export" size={24} color="#2196F3" />
       </TouchableOpacity>
     </View>
   );
@@ -223,7 +223,7 @@ export default function ActividadScreen({ navigation }) {
     <View style={[styles.estadisticasContainer, getShadowStyle()]}>
       <View style={styles.estadisticaItem}>
         <View style={[styles.estadisticaIcon, { backgroundColor: "#E8F5E9" }]}>
-          <Icon name="clock" size={20} color="#4CAF50" />
+          <WebIcon name="clock" size={20} color="#4CAF50" />
         </View>
         <View style={styles.estadisticaInfo}>
           <Text style={styles.estadisticaValor}>{estadisticas.totalHoy}</Text>
@@ -233,7 +233,7 @@ export default function ActividadScreen({ navigation }) {
 
       <View style={styles.estadisticaItem}>
         <View style={[styles.estadisticaIcon, { backgroundColor: "#E3F2FD" }]}>
-          <Icon name="calendar-week" size={20} color="#2196F3" />
+          <WebIcon name="calendar-week" size={20} color="#2196F3" />
         </View>
         <View style={styles.estadisticaInfo}>
           <Text style={styles.estadisticaValor}>{estadisticas.totalSemana}</Text>
@@ -243,7 +243,7 @@ export default function ActividadScreen({ navigation }) {
 
       <View style={styles.estadisticaItem}>
         <View style={[styles.estadisticaIcon, { backgroundColor: "#FFF3E0" }]}>
-          <Icon name="account-group" size={20} color="#FF9800" />
+          <WebIcon name="account-group" size={20} color="#FF9800" />
         </View>
         <View style={styles.estadisticaInfo}>
           <Text style={styles.estadisticaValor}>{estadisticas.usuariosActivos}</Text>
@@ -256,7 +256,7 @@ export default function ActividadScreen({ navigation }) {
   const renderFiltros = () => (
     <View style={styles.filtrosContainer}>
       <View style={styles.searchContainer}>
-        <Icon name="magnify" size={20} color="#666" style={styles.searchIcon} />
+        <WebIcon name="magnify" size={20} color="#666" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar en actividad..."
@@ -293,7 +293,7 @@ export default function ActividadScreen({ navigation }) {
           ]}
           onPress={() => setFiltroTipo("academico")}
         >
-          <Icon name="school" size={16} color="#4CAF50" />
+          <WebIcon name="school" size={16} color="#4CAF50" />
           <Text style={[
             styles.tipoButtonText,
             filtroTipo === "academico" && styles.tipoButtonTextActive
@@ -309,7 +309,7 @@ export default function ActividadScreen({ navigation }) {
           ]}
           onPress={() => setFiltroTipo("usuarios")}
         >
-          <Icon name="account-group" size={16} color="#2196F3" />
+          <WebIcon name="account-group" size={16} color="#2196F3" />
           <Text style={[
             styles.tipoButtonText,
             filtroTipo === "usuarios" && styles.tipoButtonTextActive
@@ -325,7 +325,7 @@ export default function ActividadScreen({ navigation }) {
           ]}
           onPress={() => setFiltroTipo("sistema")}
         >
-          <Icon name="server" size={16} color="#607D8B" />
+          <WebIcon name="server" size={16} color="#607D8B" />
           <Text style={[
             styles.tipoButtonText,
             filtroTipo === "sistema" && styles.tipoButtonTextActive
@@ -341,7 +341,7 @@ export default function ActividadScreen({ navigation }) {
           ]}
           onPress={() => setFiltroTipo("seguridad")}
         >
-          <Icon name="shield-account" size={16} color="#F44336" />
+          <WebIcon name="shield-account" size={16} color="#F44336" />
           <Text style={[
             styles.tipoButtonText,
             filtroTipo === "seguridad" && styles.tipoButtonTextActive
@@ -357,7 +357,7 @@ export default function ActividadScreen({ navigation }) {
     <View style={[styles.actividadCard, getShadowStyle()]}>
       <View style={styles.actividadHeader}>
         <View style={[styles.actividadIcon, { backgroundColor: `${item.color}20` }]}>
-          <Icon name={item.icono} size={20} color={item.color} />
+          <WebIcon name={item.icono} size={20} color={item.color} />
         </View>
         <View style={styles.actividadInfo}>
           <Text style={styles.actividadUsuario}>{item.usuario}</Text>
@@ -389,7 +389,7 @@ export default function ActividadScreen({ navigation }) {
       }
       ListEmptyComponent={
         <View style={styles.emptyContainer}>
-          <Icon name="text-box-search" size={50} color="#ccc" />
+          <WebIcon name="text-box-search" size={50} color="#ccc" />
           <Text style={styles.emptyText}>
             No se encontraron registros con los filtros seleccionados
           </Text>

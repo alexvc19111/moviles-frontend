@@ -26,6 +26,7 @@ import ActividadScreen from "../screens/Admin/ActividadScreen";
 import AlertasScreen from "../screens/Admin/AlertasScreen";
 import AsignarGruposScreen from "../screens/Admin/AsignarGruposScreen";
 import PeriodosAcademicosScreen from "../screens/Admin/PeriodosAcademicosScreen";
+import EditarPerfil from "../screens/Admin/EditarPerfil";
 
 //Profesor
 import HomeProfesorScreen from "../screens/Profesor/HomeProfesorScreen";
@@ -42,7 +43,6 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="Recuperar Contraseña" component={ForgotPasswordScreen} />
-
       {/* ALUMNOS */}
       <Stack.Screen name="HomeAlumno" component={HomeAlumnoScreen} />
       <Stack.Screen name="Calificaciones" component={CalificacionesScreen} />
@@ -67,6 +67,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Alertas" component={AlertasScreen} />
       <Stack.Screen name="AsignarGrupos" component={AsignarGruposScreen} />
       <Stack.Screen name="PeriodosAcademicos" component={PeriodosAcademicosScreen} />
+      <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
 
     
 

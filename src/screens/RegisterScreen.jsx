@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../components/WebIcon";
 
 export default function RegisterScreen({ navigation }) {
   // Estados
@@ -136,7 +136,7 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Matrícula *</Text>
               <View style={styles.inputWrapper}>
-                <Icon name="identifier" size={20} color="#666" style={styles.inputIcon} />
+                <WebIcon name="identifier" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Ej: A2023001"
                   value={formData.matricula}
@@ -151,7 +151,7 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Carrera</Text>
               <View style={styles.inputWrapper}>
-                <Icon name="book-education" size={20} color="#666" style={styles.inputIcon} />
+                <WebIcon name="book-education" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Ej: Ingeniería en Sistemas"
                   value={formData.carrera}
@@ -168,7 +168,7 @@ export default function RegisterScreen({ navigation }) {
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Departamento</Text>
             <View style={styles.inputWrapper}>
-              <Icon name="office-building" size={20} color="#666" style={styles.inputIcon} />
+              <WebIcon name="office-building" size={20} color="#666" style={styles.inputIcon} />
               <TextInput
                 placeholder="Ej: Ciencias Básicas"
                 value={formData.carrera}
@@ -197,7 +197,7 @@ export default function RegisterScreen({ navigation }) {
               style={styles.backButton}
               onPress={() => navigation.goBack()}
             >
-              <Icon name="arrow-left" size={24} color="#007bff" />
+              <WebIcon name="arrow-left" size={24} color="#007bff" />
             </TouchableOpacity>
             <Text style={styles.title}>Crear Cuenta</Text>
             <View style={styles.backButtonPlaceholder} />
@@ -246,7 +246,7 @@ export default function RegisterScreen({ navigation }) {
               <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
                 <Text style={styles.label}>Nombre *</Text>
                 <View style={styles.inputWrapper}>
-                  <Icon name="account" size={20} color="#666" style={styles.inputIcon} />
+                  <WebIcon name="account" size={20} color="#666" style={styles.inputIcon} />
                   <TextInput
                     placeholder="Juan"
                     value={formData.nombre}
@@ -261,7 +261,7 @@ export default function RegisterScreen({ navigation }) {
               <View style={[styles.inputContainer, { flex: 1 }]}>
                 <Text style={styles.label}>Apellido *</Text>
                 <View style={styles.inputWrapper}>
-                  <Icon name="account" size={20} color="#666" style={styles.inputIcon} />
+                  <WebIcon name="account" size={20} color="#666" style={styles.inputIcon} />
                   <TextInput
                     placeholder="Pérez"
                     value={formData.apellido}
@@ -277,7 +277,7 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Correo Electrónico *</Text>
               <View style={styles.inputWrapper}>
-                <Icon name="email" size={20} color="#666" style={styles.inputIcon} />
+                <WebIcon name="email" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   placeholder="ejemplo@escuela.edu"
                   value={formData.correo}
@@ -293,7 +293,7 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Teléfono</Text>
               <View style={styles.inputWrapper}>
-                <Icon name="phone" size={20} color="#666" style={styles.inputIcon} />
+                <WebIcon name="phone" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   placeholder="(555) 123-4567"
                   value={formData.telefono}
@@ -317,7 +317,7 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Contraseña *</Text>
               <View style={styles.inputWrapper}>
-                <Icon name="lock" size={20} color="#666" style={styles.inputIcon} />
+                <WebIcon name="lock" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Mínimo 8 caracteres"
                   value={formData.contraseña}
@@ -348,7 +348,7 @@ export default function RegisterScreen({ navigation }) {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Confirmar Contraseña *</Text>
               <View style={styles.inputWrapper}>
-                <Icon name="lock-check" size={20} color="#666" style={styles.inputIcon} />
+                <WebIcon name="lock-check" size={20} color="#666" style={styles.inputIcon} />
                 <TextInput
                   placeholder="Repite tu contraseña"
                   value={formData.confirmarContraseña}
@@ -375,7 +375,7 @@ export default function RegisterScreen({ navigation }) {
 
           {/* Términos y Condiciones */}
           <View style={styles.termsContainer}>
-            <Icon name="shield-check" size={20} color="#007bff" />
+            <WebIcon name="shield-check" size={20} color="#007bff" />
             <Text style={styles.termsText}>
               Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad
             </Text>
@@ -392,7 +392,7 @@ export default function RegisterScreen({ navigation }) {
             ) : (
               <>
                 <Text style={styles.registerButtonText}>Crear Cuenta</Text>
-                <Icon name="check-circle" size={20} color="#fff" />
+                <WebIcon name="check-circle" size={20} color="#fff" />
               </>
             )}
           </TouchableOpacity>
@@ -407,7 +407,7 @@ export default function RegisterScreen({ navigation }) {
 
           {/* Información adicional */}
           <View style={styles.infoBox}>
-            <Icon name="information" size={18} color="#666" />
+            <WebIcon name="information" size={18} color="#666" />
             <Text style={styles.infoText}>
               Los campos marcados con * son obligatorios. 
               Tu información está protegida y solo será usada con fines académicos.

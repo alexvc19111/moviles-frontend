@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Alert
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import WebIcon from "../../components/WebIcon";
 
 export default function MateriasScreen({ navigation, route }) {
   // Manejo SEGURO de parámetros - SIN destructuring directo
@@ -92,7 +92,7 @@ export default function MateriasScreen({ navigation, route }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#fff" />
+        <WebIcon name="arrow-left" size={24} color="#fff" />
       </TouchableOpacity>
       
       <Text style={styles.headerTitle}>Mis Materias</Text>
@@ -101,7 +101,7 @@ export default function MateriasScreen({ navigation, route }) {
         style={styles.filterButton}
         onPress={() => Alert.alert("Filtrar", "Filtrar materias por semestre")}
       >
-        <Icon name="filter" size={22} color="#fff" />
+        <WebIcon name="filter" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -112,7 +112,7 @@ export default function MateriasScreen({ navigation, route }) {
       
       <View style={styles.resumenStats}>
         <View style={styles.statItem}>
-          <Icon name="book-open-variant" size={24} color="#2196F3" />
+          <WebIcon name="book-open-variant" size={24} color="#2196F3" />
           <Text style={styles.statValue}>{materias.length}</Text>
           <Text style={styles.statLabel}>Materias</Text>
         </View>
@@ -120,7 +120,7 @@ export default function MateriasScreen({ navigation, route }) {
         <View style={styles.statDivider} />
         
         <View style={styles.statItem}>
-          <Icon name="weight" size={24} color="#4CAF50" />
+          <WebIcon name="weight" size={24} color="#4CAF50" />
           <Text style={styles.statValue}>{calcularCreditosTotales()}</Text>
           <Text style={styles.statLabel}>Créditos</Text>
         </View>
@@ -128,7 +128,7 @@ export default function MateriasScreen({ navigation, route }) {
         <View style={styles.statDivider} />
         
         <View style={styles.statItem}>
-          <Icon name="chart-line" size={24} color="#FF9800" />
+          <WebIcon name="chart-line" size={24} color="#FF9800" />
           <Text style={styles.statValue}>{calcularPromedioGeneral()}</Text>
           <Text style={styles.statLabel}>Promedio</Text>
         </View>
@@ -151,7 +151,7 @@ export default function MateriasScreen({ navigation, route }) {
           )}
         >
           <View style={[styles.materiaIcon, { backgroundColor: materia.color }]}>
-            <Icon name={materia.icon || "book"} size={24} color="#fff" />
+            <WebIcon name={materia.icon || "book"} size={24} color="#fff" />
           </View>
           
           <View style={styles.materiaInfo}>
@@ -163,17 +163,17 @@ export default function MateriasScreen({ navigation, route }) {
             </View>
             
             <Text style={styles.materiaProfesor}>
-              <Icon name="teach" size={12} color="#666" /> {materia.profesor}
+              <WebIcon name="teach" size={12} color="#666" /> {materia.profesor}
             </Text>
             
             <View style={styles.materiaDetails}>
               <View style={styles.detailItem}>
-                <Icon name="identifier" size={12} color="#666" />
+                <WebIcon name="identifier" size={12} color="#666" />
                 <Text style={styles.detailText}>{materia.codigo}</Text>
               </View>
               
               <View style={styles.detailItem}>
-                <Icon name="map-marker" size={12} color="#666" />
+                <WebIcon name="map-marker" size={12} color="#666" />
                 <Text style={styles.detailText}>{materia.aula}</Text>
               </View>
             </View>
@@ -209,7 +209,7 @@ export default function MateriasScreen({ navigation, route }) {
           onPress={() => navigation.navigate('Horario')}
         >
           <View style={[styles.accionIcon, { backgroundColor: "#FFE0B2" }]}>
-            <Icon name="calendar-clock" size={24} color="#FF9800" />
+            <WebIcon name="calendar-clock" size={24} color="#FF9800" />
           </View>
           <Text style={styles.accionText}>Horario</Text>
         </TouchableOpacity>
@@ -219,7 +219,7 @@ export default function MateriasScreen({ navigation, route }) {
           onPress={() => navigation.navigate('Calificaciones')}
         >
           <View style={[styles.accionIcon, { backgroundColor: "#C8E6C9" }]}>
-            <Icon name="chart-box" size={24} color="#4CAF50" />
+            <WebIcon name="chart-box" size={24} color="#4CAF50" />
           </View>
           <Text style={styles.accionText}>Calificaciones</Text>
         </TouchableOpacity>
@@ -229,7 +229,7 @@ export default function MateriasScreen({ navigation, route }) {
           onPress={() => Alert.alert("Kardex", "Consultar kardex académico")}
         >
           <View style={[styles.accionIcon, { backgroundColor: "#BBDEFB" }]}>
-            <Icon name="file-document" size={24} color="#2196F3" />
+            <WebIcon name="file-document" size={24} color="#2196F3" />
           </View>
           <Text style={styles.accionText}>Kardex</Text>
         </TouchableOpacity>
@@ -239,7 +239,7 @@ export default function MateriasScreen({ navigation, route }) {
           onPress={() => Alert.alert("Descargar", "Descargar lista de materias")}
         >
           <View style={[styles.accionIcon, { backgroundColor: "#E1BEE7" }]}>
-            <Icon name="download" size={24} color="#9C27B0" />
+            <WebIcon name="download" size={24} color="#9C27B0" />
           </View>
           <Text style={styles.accionText}>Descargar</Text>
         </TouchableOpacity>
@@ -264,7 +264,7 @@ export default function MateriasScreen({ navigation, route }) {
           style={styles.backToHomeButton}
           onPress={() => navigation.navigate('HomeAlumno')}
         >
-          <Icon name="home" size={20} color="#fff" />
+          <WebIcon name="home" size={20} color="#fff" />
           <Text style={styles.backToHomeText}>Volver al Inicio</Text>
         </TouchableOpacity>
       </ScrollView>

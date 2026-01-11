@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 
 const { width } = Dimensions.get("window");
 
@@ -52,28 +52,28 @@ export default function ReportesScreen({ navigation }) {
             <View style={styles.statsGrid}>
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: "#E3F2FD" }]}>
-                  <Icon name="account-school" size={24} color="#2196F3" />
+                  <WebIcon name="account-school" size={24} color="#2196F3" />
                 </View>
                 <Text style={styles.statValue}>{reportData.general.totalAlumnos}</Text>
                 <Text style={styles.statLabel}>Total Alumnos</Text>
               </View>
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: "#E8F5E9" }]}>
-                  <Icon name="teach" size={24} color="#4CAF50" />
+                  <WebIcon name="teach" size={24} color="#4CAF50" />
                 </View>
                 <Text style={styles.statValue}>{reportData.general.totalProfesores}</Text>
                 <Text style={styles.statLabel}>Profesores</Text>
               </View>
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: "#FFF3E0" }]}>
-                  <Icon name="book-open" size={24} color="#FF9800" />
+                  <WebIcon name="book-open" size={24} color="#FF9800" />
                 </View>
                 <Text style={styles.statValue}>{reportData.general.totalMaterias}</Text>
                 <Text style={styles.statLabel}>Materias</Text>
               </View>
               <View style={styles.statCard}>
                 <View style={[styles.statIcon, { backgroundColor: "#F3E5F5" }]}>
-                  <Icon name="chart-line" size={24} color="#9C27B0" />
+                  <WebIcon name="chart-line" size={24} color="#9C27B0" />
                 </View>
                 <Text style={styles.statValue}>{reportData.general.promedioGeneral.toFixed(1)}</Text>
                 <Text style={styles.statLabel}>Promedio General</Text>
@@ -183,11 +183,11 @@ export default function ReportesScreen({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#333" />
+          <WebIcon name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Reportes del Sistema</Text>
         <TouchableOpacity style={styles.exportButton}>
-          <Icon name="download" size={24} color="#007bff" />
+          <WebIcon name="download" size={24} color="#007bff" />
         </TouchableOpacity>
       </View>
 
@@ -206,7 +206,7 @@ export default function ReportesScreen({ navigation }) {
             ]}
             onPress={() => setReportType(type.id)}
           >
-            <Icon 
+            <WebIcon 
               name={type.icon} 
               size={20} 
               color={reportType === type.id ? "#fff" : "#666"} 
@@ -230,15 +230,15 @@ export default function ReportesScreen({ navigation }) {
           <Text style={styles.sectionTitle}>Acciones</Text>
           <View style={styles.actionButtons}>
             <TouchableOpacity style={styles.actionButton}>
-              <Icon name="printer" size={24} color="#666" />
+              <WebIcon name="printer" size={24} color="#666" />
               <Text style={styles.actionButtonText}>Imprimir Reporte</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton}>
-              <Icon name="file-pdf" size={24} color="#F44336" />
+              <WebIcon name="file-pdf" size={24} color="#F44336" />
               <Text style={styles.actionButtonText}>Exportar PDF</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton}>
-              <Icon name="file-excel" size={24} color="#4CAF50" />
+              <WebIcon name="file-excel" size={24} color="#4CAF50" />
               <Text style={styles.actionButtonText}>Exportar Excel</Text>
             </TouchableOpacity>
           </View>
@@ -246,7 +246,7 @@ export default function ReportesScreen({ navigation }) {
 
         {/* Información */}
         <View style={styles.infoCard}>
-          <Icon name="information" size={24} color="#007bff" />
+          <WebIcon name="information" size={24} color="#007bff" />
           <Text style={styles.infoText}>
             Los reportes se actualizan automáticamente cada 24 horas.
             Para información en tiempo real, actualiza manualmente.

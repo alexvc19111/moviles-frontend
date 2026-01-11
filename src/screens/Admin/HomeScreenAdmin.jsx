@@ -1,314 +1,118 @@
 import React, { useState, useEffect } from "react";
-import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert, FlatList, Modal, TextInput, Platform } from "react-native";
-import { useRoute } from '@react-navigation/native'; // Importamos useRoute
+import {SafeAreaView,View,Text,StyleSheet,ScrollView,TouchableOpacity,RefreshControl,Alert,Modal,Platform,Image} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
-export default function HomeScreenAdmin({ route, navigation }) { // Eliminamos route de los parámetros
-  //const route = useRoute(); // Obtenemos route usando el hook
-const user = route?.params?.user ?? {
-  name: "Admin",
-  role: "admin",
-};
+export default function HomeScreenAdmin({ route, navigation }) {
+  const user = route?.params?.user ?? {
+    name: "Admin Sistema",
+    role: "admin",
+    email: "admin@sistema.com",
+    avatar: null,
+  };
+
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedAction, setSelectedAction] = useState(null);
-  
-  // Estadísticas del sistema
-  const [stats, setStats] = useState({
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  /* =================== DATOS =================== */
+  const [stats] = useState({
     totalAlumnos: 1250,
     totalProfesores: 85,
     totalMaterias: 45,
-    totalAvisos: 12,
     usuariosActivos: 342,
-    calificacionesPendientes: 45,
   });
 
-  // Acciones rápidas del admin
   const adminActions = [
-    {
-      id: 1,
-      title: "Gestión de Usuarios",
-      description: "Agregar, editar o eliminar usuarios",
-      icon: "account-multiple",
-      color: "#2196F3",
-      screen: "GestionUsuarios",
-    },
-    {
-      id: 2,
-      title: "Gestión de Materias",
-      description: "Administrar materias y planes de estudio",
-      icon: "book-open-variant",
-      color: "#4CAF50",
-      screen: "GestionMaterias",
-    },
-    {
-      id: 3,
-      title: "Asignar Grupos",
-      description: "Asignar alumnos a grupos y materias",
-      icon: "account-group",
-      color: "#FF9800",
-      screen: "AsignarGrupos",
-    },
-    {
-      id: 4,
-      title: "Periodos Académicos",
-      description: "Crear y gestionar periodos escolares",
-      icon: "calendar-multiple",
-      color: "#9C27B0",
-      screen: "PeriodosAcademicos",
-    },
-    {
-      id: 5,
-      title: "Reportes del Sistema",
-      description: "Generar reportes y estadísticas",
-      icon: "chart-bar",
-      color: "#607D8B",
-      screen: "Reportes",
-    },
-    {
-      id: 6,
-      title: "Configuración",
-      description: "Configurar parámetros del sistema",
-      icon: "cog",
-      color: "#795548",
-      screen: "Configuracion",
-    },
+    { id: 1, title: "Gestión de Usuarios", icon: "account-multiple", color: "#2196F3", screen: "GestionUsuarios" },
+    { id: 2, title: "Gestión de Materias", icon: "book-open-variant", color: "#4CAF50", screen: "GestionMaterias" },
+    { id: 3, title: "Asignar Grupos", icon: "account-group", color: "#FF9800", screen: "AsignarGrupos" },
+    { id: 4, title: "Periodos Académicos", icon: "calendar-multiple", color: "#9C27B0", screen: "PeriodosAcademicos" },
+    { id: 5, title: "Reportes", icon: "chart-bar", color: "#607D8B", screen: "Reportes" },
+    { id: 6, title: "Configuración", icon: "cog", color: "#795548", screen: "Configuracion" },
   ];
 
-  // Actividad reciente
-  const [recentActivity, setRecentActivity] = useState([
-    { id: 1, user: "Prof. García", action: "Registró calificaciones", time: "Hace 10 min", type: "calificacion" },
-    { id: 2, user: "Admin", action: "Creó nuevo usuario", time: "Hace 30 min", type: "usuario" },
-    { id: 3, user: "Sistema", action: "Backup automático", time: "Hace 2 horas", type: "sistema" },
-    { id: 4, user: "Alumno Pérez", action: "Actualizó perfil", time: "Hace 3 horas", type: "perfil" },
-  ]);
-
-  // Alertas del sistema
-  const [systemAlerts, setSystemAlerts] = useState([
-    { id: 1, message: "5 calificaciones pendientes de aprobación", level: "warning" },
-    { id: 2, message: "Backup programado para hoy a las 20:00", level: "info" },
-    { id: 3, message: "3 usuarios con contraseña expirada", level: "danger" },
-  ]);
-
-  const loadDashboardData = () => {
-    // Simular carga de datos
-    console.log("Cargando datos de administrador...");
+  /* =================== FUNCIONES =================== */
+  const getShadowStyle = () => {
+    if (Platform.OS === "web") {
+      return { boxShadow: "0px 2px 6px rgba(0,0,0,0.1)" };
+    }
+    return {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    };
   };
-
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
       setRefreshing(false);
-      Alert.alert("Actualizado", "Datos del sistema actualizados");
-    }, 2000);
+      Alert.alert("Actualizado", "Datos actualizados");
+    }, 1500);
   };
 
-  const handleQuickAction = (action) => {
-    if (action.screen) {
-      navigation.navigate(action.screen);
-    } else {
-      setSelectedAction(action);
-      setModalVisible(true);
-    }
+  const handleEditProfile = () => {
+    setMenuVisible(false);
+    navigation.navigate("EditarPerfil", { user });
   };
 
-  // Función para manejar sombras de forma multiplataforma
-  const getShadowStyle = (elevation = 3, shadowOpacity = 0.1, shadowRadius = 4) => {
-    if (Platform.OS === 'web') {
-      return {
-        boxShadow: `0px 2px ${shadowRadius}px rgba(0,0,0,${shadowOpacity})`,
-      };
-    }
-    return {
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: shadowOpacity,
-      shadowRadius: shadowRadius,
-      elevation: elevation,
-    };
+  const handleLogout = () => {
+    setMenuVisible(false);
+    setLogoutModalVisible(true);
   };
 
+  const confirmLogout = () => {
+    setLogoutModalVisible(false);
+    Alert.alert(
+      "Cerrar Sesión",
+      "¿Estás seguro de que quieres salir?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel"
+        },
+        { 
+          text: "Cerrar Sesión", 
+          onPress: () => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
+          }
+        }
+      ]
+    );
+  };
+
+  /* =================== HEADER =================== */
   const renderHeader = () => (
     <View style={styles.header}>
       <View style={styles.userInfo}>
-        <View style={styles.avatar}>
-          <Icon name="shield-account" size={30} color="#fff" />
-        </View>
+        <TouchableOpacity onPress={() => setMenuVisible(true)}>
+          <View style={styles.menuButton}>
+            <Icon name="menu" size={28} color="#333" />
+          </View>
+        </TouchableOpacity>
         <View style={styles.userDetails}>
           <Text style={styles.welcomeText}>Panel de Administración</Text>
           <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.userRole}>👑 Administrador Principal</Text>
+          <Text style={styles.userRole}>
+            <Icon name="shield-check" size={12} color="#4CAF50" /> Administrador
+          </Text>
         </View>
       </View>
+
       <View style={styles.headerActions}>
         <TouchableOpacity style={styles.headerButton}>
-          <Icon name="bell" size={24} color="#333" />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.badgeText}>3</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.headerButton}
-          onPress={() => navigation.navigate("Configuracion")}
-        >
-          <Icon name="cog" size={24} color="#333" />
+          <Icon name="bell-outline" size={24} color="#333" />
         </TouchableOpacity>
       </View>
     </View>
   );
 
-  const renderStats = () => (
-    <View style={styles.statsContainer}>
-      <View style={styles.statRow}>
-        <View style={[styles.statCard, getShadowStyle()]}>
-          <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
-            <Icon name="account-school" size={24} color="#2196F3" />
-          </View>
-          <Text style={styles.statValue}>{stats.totalAlumnos}</Text>
-          <Text style={styles.statLabel}>Alumnos</Text>
-        </View>
-        
-        <View style={[styles.statCard, getShadowStyle()]}>
-          <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
-            <Icon name="teach" size={24} color="#4CAF50" />
-          </View>
-          <Text style={styles.statValue}>{stats.totalProfesores}</Text>
-          <Text style={styles.statLabel}>Profesores</Text>
-        </View>
-      </View>
-      
-      <View style={styles.statRow}>
-        <View style={[styles.statCard, getShadowStyle()]}>
-          <View style={[styles.statIcon, { backgroundColor: '#FFF3E0' }]}>
-            <Icon name="book-open" size={24} color="#FF9800" />
-          </View>
-          <Text style={styles.statValue}>{stats.totalMaterias}</Text>
-          <Text style={styles.statLabel}>Materias</Text>
-        </View>
-        
-        <View style={[styles.statCard, getShadowStyle()]}>
-          <View style={[styles.statIcon, { backgroundColor: '#F3E5F5' }]}>
-            <Icon name="account-check" size={24} color="#9C27B0" />
-          </View>
-          <Text style={styles.statValue}>{stats.usuariosActivos}</Text>
-          <Text style={styles.statLabel}>Activos</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderQuickActions = () => (
-    <View style={[styles.section, getShadowStyle(2, 0.05)]}>
-      <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
-      <View style={styles.actionsGrid}>
-        {adminActions.map((action) => (
-          <TouchableOpacity
-            key={action.id}
-            style={[styles.actionCard, getShadowStyle(1, 0.05, 2)]}
-            onPress={() => handleQuickAction(action)}
-          >
-            <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
-              <Icon name={action.icon} size={24} color="#fff" />
-            </View>
-            <Text style={styles.actionTitle}>{action.title}</Text>
-            <Text style={styles.actionDescription}>{action.description}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
-
-  const renderSystemAlerts = () => (
-    <View style={[styles.section, getShadowStyle(2, 0.05)]}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Alertas del Sistema</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Alertas")}>
-          <Text style={styles.seeAll}>Ver todas</Text>
-        </TouchableOpacity>
-      </View>
-      
-      {systemAlerts.map((alert) => (
-        <View 
-          key={alert.id} 
-          style={[
-            styles.alertCard,
-            { borderLeftColor: alert.level === 'danger' ? '#F44336' : 
-                         alert.level === 'warning' ? '#FF9800' : '#2196F3' }
-          ]}
-        >
-          <Icon 
-            name={alert.level === 'danger' ? "alert-circle" : 
-                  alert.level === 'warning' ? "alert" : "information"} 
-            size={20} 
-            color={alert.level === 'danger' ? "#F44336" : 
-                   alert.level === 'warning' ? "#FF9800" : "#2196F3"} 
-          />
-          <Text style={styles.alertMessage}>{alert.message}</Text>
-        </View>
-      ))}
-    </View>
-  );
-
-  const renderRecentActivity = () => (
-    <View style={[styles.section, getShadowStyle(2, 0.05)]}>
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Actividad Reciente</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("Actividad")}>
-          <Text style={styles.seeAll}>Ver todo</Text>
-        </TouchableOpacity>
-      </View>
-      
-      {recentActivity.map((activity) => (
-        <View key={activity.id} style={styles.activityItem}>
-          <View style={[
-            styles.activityIcon,
-            { backgroundColor: 
-              activity.type === 'calificacion' ? '#E8F5E9' : 
-              activity.type === 'usuario' ? '#E3F2FD' : 
-              activity.type === 'sistema' ? '#FFF3E0' : '#F3E5F5' 
-            }
-          ]}>
-            <Icon 
-              name={
-                activity.type === 'calificacion' ? "file-document" : 
-                activity.type === 'usuario' ? "account-plus" : 
-                activity.type === 'sistema' ? "backup-restore" : "account-edit"
-              } 
-              size={18} 
-              color="#666" 
-            />
-          </View>
-          <View style={styles.activityInfo}>
-            <Text style={styles.activityUser}>{activity.user}</Text>
-            <Text style={styles.activityAction}>{activity.action}</Text>
-          </View>
-          <Text style={styles.activityTime}>{activity.time}</Text>
-        </View>
-      ))}
-    </View>
-  );
-
-  const renderSystemInfo = () => (
-    <View style={styles.systemInfo}>
-      <View style={styles.infoRow}>
-        <Icon name="server" size={16} color="#666" />
-        <Text style={styles.infoText}>Servidor: Online</Text>
-      </View>
-      <View style={styles.infoRow}>
-        <Icon name="database" size={16} color="#666" />
-        <Text style={styles.infoText}>Base de datos: 2.4 GB / 10 GB</Text>
-      </View>
-      <View style={styles.infoRow}>
-        <Icon name="security" size={16} color="#666" />
-        <Text style={styles.infoText}>Último backup: Hoy 00:00</Text>
-      </View>
-    </View>
-  );
-
+  /* =================== UI =================== */
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -318,13 +122,89 @@ const user = route?.params?.user ?? {
         showsVerticalScrollIndicator={false}
       >
         {renderHeader()}
-        {renderStats()}
-        {renderQuickActions()}
-        {renderSystemAlerts()}
-        {renderRecentActivity()}
-        {renderSystemInfo()}
-        
-        {/* Footer */}
+
+        {/* ===== ESTADÍSTICAS ===== */}
+        <View style={styles.statsContainer}>
+          <View style={styles.statRow}>
+            <View style={[styles.statCard, getShadowStyle()]}>
+              <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
+                <Icon name="account-school" size={28} color="#2196F3" />
+              </View>
+              <Text style={styles.statValue}>{stats.totalAlumnos}</Text>
+              <Text style={styles.statLabel}>Alumnos</Text>
+            </View>
+            <View style={[styles.statCard, getShadowStyle()]}>
+              <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
+                <Icon name="teach" size={28} color="#4CAF50" />
+              </View>
+              <Text style={styles.statValue}>{stats.totalProfesores}</Text>
+              <Text style={styles.statLabel}>Profesores</Text>
+            </View>
+          </View>
+          
+          <View style={styles.statRow}>
+            <View style={[styles.statCard, getShadowStyle()]}>
+              <View style={[styles.statIcon, { backgroundColor: '#FFF3E0' }]}>
+                <Icon name="book-open" size={28} color="#FF9800" />
+              </View>
+              <Text style={styles.statValue}>{stats.totalMaterias}</Text>
+              <Text style={styles.statLabel}>Materias</Text>
+            </View>
+            <View style={[styles.statCard, getShadowStyle()]}>
+              <View style={[styles.statIcon, { backgroundColor: '#F3E5F5' }]}>
+                <Icon name="account-check" size={28} color="#9C27B0" />
+              </View>
+              <Text style={styles.statValue}>{stats.usuariosActivos}</Text>
+              <Text style={styles.statLabel}>Usuarios Activos</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ===== ACCIONES RÁPIDAS ===== */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
+          <View style={styles.actionsGrid}>
+            {adminActions.map((action) => (
+              <TouchableOpacity
+                key={action.id}
+                style={[styles.actionCard, getShadowStyle()]}
+                onPress={() => {
+                  setMenuVisible(false);
+                  navigation.navigate(action.screen);
+                }}
+              >
+                <View style={[styles.actionIcon, { backgroundColor: action.color }]}>
+                  <Icon name={action.icon} size={24} color="#fff" />
+                </View>
+                <Text style={styles.actionTitle}>{action.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* ===== ESTADO DEL SISTEMA ===== */}
+        <View style={[styles.section, getShadowStyle()]}>
+          <Text style={styles.sectionTitle}>Estado del Sistema</Text>
+          
+          <View style={styles.systemInfo}>
+            <View style={styles.infoItem}>
+              <Icon name="server" size={20} color="#4CAF50" />
+              <Text style={styles.infoText}>Servidor: <Text style={styles.infoValue}>Online</Text></Text>
+            </View>
+            
+            <View style={styles.infoItem}>
+              <Icon name="database" size={20} color="#2196F3" />
+              <Text style={styles.infoText}>Base de datos: <Text style={styles.infoValue}>2.4 GB / 10 GB</Text></Text>
+            </View>
+            
+            <View style={styles.infoItem}>
+              <Icon name="backup-restore" size={20} color="#9C27B0" />
+              <Text style={styles.infoText}>Último backup: <Text style={styles.infoValue}>Hoy 00:00</Text></Text>
+            </View>
+          </View>
+        </View>
+
+        {/* ===== FOOTER ===== */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
             Sistema de Gestión Escolar v3.0 • Panel de Administración
@@ -335,38 +215,143 @@ const user = route?.params?.user ?? {
         </View>
       </ScrollView>
 
-      {/* Modal de acción rápida */}
+      {/* ===== MENÚ DESPLEGABLE ===== */}
       <Modal
-        animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        animationType="fade"
+        visible={menuVisible}
+        onRequestClose={() => setMenuVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, getShadowStyle(5, 0.2, 10)]}>
-            <Text style={styles.modalTitle}>
-              {selectedAction?.title || "Acción"}
-            </Text>
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setMenuVisible(false)}
+        >
+          <View style={[styles.menu, getShadowStyle()]}>
+            {/* Encabezado del menú */}
+            <View style={styles.menuHeader}>
+              {user.avatar ? (
+                <Image source={{ uri: user.avatar }} style={styles.menuAvatar} />
+              ) : (
+                <View style={[styles.menuAvatar, styles.avatarFallback]}>
+                  <Icon name="shield-account" size={32} color="#fff" />
+                </View>
+              )}
+              <View style={styles.menuUserInfo}>
+                <Text style={styles.menuUserName}>{user.name}</Text>
+                <Text style={styles.menuUserRole}>
+                  <Icon name="crown" size={12} color="#FFD700" /> Administrador
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.menuDivider} />
+
+            {/* Opciones del menú */}
+            <MenuItem 
+              title="Dashboard" 
+              icon="view-dashboard-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("HomeAdmin");
+              }} 
+            />
+            <MenuItem 
+              title="Gestión de Usuarios" 
+              icon="account-multiple-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("GestionUsuarios");
+              }} 
+            />
+            <MenuItem 
+              title="Gestión de Materias" 
+              icon="book-open-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("GestionMaterias");
+              }} 
+            />
+            <MenuItem 
+              title="Asignar Grupos" 
+              icon="account-group-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("AsignarGrupos");
+              }} 
+            />
+            <MenuItem 
+              title="Periodos Académicos" 
+              icon="calendar-blank-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("PeriodosAcademicos");
+              }} 
+            />
+            <MenuItem 
+              title="Reportes del Sistema" 
+              icon="chart-bar" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("Reportes");
+              }} 
+            />
+            <MenuItem 
+              title="Configuración" 
+              icon="cog-outline" 
+              onPress={() => {
+                setMenuVisible(false);
+                navigation.navigate("Configuracion");
+              }} 
+            />
+
+            <View style={styles.menuDivider} />
+
+            {/* Opciones de usuario */}
+            <MenuItem 
+              title="Editar Perfil" 
+              icon="account-edit-outline" 
+              color="#2196F3"
+              onPress={handleEditProfile} 
+            />
+            <MenuItem 
+              title="Cerrar Sesión" 
+              icon="logout-variant" 
+              color="#F44336"
+              onPress={handleLogout} 
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* ===== MODAL DE CONFIRMACIÓN PARA CERRAR SESIÓN ===== */}
+      <Modal
+        transparent={true}
+        visible={logoutModalVisible}
+        animationType="fade"
+        onRequestClose={() => setLogoutModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, getShadowStyle()]}>
+            <Icon name="logout-variant" size={50} color="#F44336" style={styles.modalIcon} />
+            <Text style={styles.modalTitle}>Cerrar Sesión</Text>
             <Text style={styles.modalDescription}>
-              {selectedAction?.description || "Descripción"}
+              ¿Estás seguro de que quieres salir del sistema?
             </Text>
             
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setModalVisible(false)}
+                onPress={() => setLogoutModalVisible(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={[styles.modalButton, styles.confirmButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  Alert.alert("Acción", `${selectedAction?.title} ejecutada`);
-                }}
+                onPress={confirmLogout}
               >
-                <Text style={styles.confirmButtonText}>Confirmar</Text>
+                <Text style={styles.confirmButtonText}>Cerrar Sesión</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -376,283 +361,320 @@ const user = route?.params?.user ?? {
   );
 }
 
+/* =================== COMPONENTE MENÚ ITEM =================== */
+const MenuItem = ({ title, icon, color = "#333", onPress }) => (
+  <TouchableOpacity style={styles.menuItem} onPress={onPress}>
+    <Icon name={icon} size={22} color={color} style={styles.menuItemIcon} />
+    <Text style={[styles.menuItemText, { color }]}>{title}</Text>
+    <Icon name="chevron-right" size={20} color="#999" />
+  </TouchableOpacity>
+);
+
+/* =================== STYLES =================== */
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
+  safeArea: { 
+    flex: 1, 
+    backgroundColor: "#f5f7fa" 
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingTop: 15,
+    paddingBottom: 15,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#eaeaea",
+    ...Platform.select({
+      web: {
+        boxShadow: "0px 2px 4px rgba(0,0,0,0.05)",
+      },
+      default: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+      },
+    }),
   },
-  userInfo: {
-    flexDirection: "row",
+
+  userInfo: { 
+    flexDirection: "row", 
     alignItems: "center",
-    flex: 1,
+    flex: 1 
   },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#6f42c1",
-    justifyContent: "center",
-    alignItems: "center",
+
+  menuButton: {
+    padding: 8,
     marginRight: 15,
   },
+
   userDetails: {
     flex: 1,
   },
-  welcomeText: {
-    fontSize: 12,
+
+  welcomeText: { 
+    fontSize: 13, 
     color: "#666",
     fontWeight: "500",
+    marginBottom: 2 
   },
-  userName: {
-    fontSize: 18,
-    fontWeight: "bold",
+  
+  userName: { 
+    fontSize: 20, 
+    fontWeight: "bold", 
     color: "#333",
+    marginBottom: 3 
   },
-  userRole: {
-    fontSize: 12,
-    color: "#6f42c1",
-    fontWeight: "600",
-    marginTop: 2,
+  
+  userRole: { 
+    fontSize: 12, 
+    color: "#4CAF50", 
+    fontWeight: "500",
   },
-  headerActions: {
-    flexDirection: "row",
+
+  headerActions: { 
+    flexDirection: "row" 
   },
-  headerButton: {
-    padding: 10,
-    position: "relative",
+  
+  headerButton: { 
+    padding: 10 
   },
-  notificationBadge: {
-    position: "absolute",
-    top: 5,
-    right: 5,
-    backgroundColor: "#F44336",
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: "center",
-    alignItems: "center",
+
+  statsContainer: { 
+    padding: 20 
   },
-  badgeText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  statsContainer: {
-    paddingHorizontal: 20,
-    marginTop: 15,
-  },
-  statRow: {
-    flexDirection: "row",
+  
+  statRow: { 
+    flexDirection: "row", 
     justifyContent: "space-between",
-    marginBottom: 15,
+    marginBottom: 15 
   },
+  
   statCard: {
-    flex: 1,
     backgroundColor: "#fff",
-    borderRadius: 12,
     padding: 20,
-    marginHorizontal: 5,
+    borderRadius: 12,
+    width: "48%",
     alignItems: "center",
   },
+  
   statIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  statValue: {
-    fontSize: 24,
+  
+  statValue: { 
+    fontSize: 28, 
     fontWeight: "bold",
     color: "#333",
+    marginBottom: 4 
   },
-  statLabel: {
-    fontSize: 12,
+  
+  statLabel: { 
     color: "#666",
-    marginTop: 5,
-    textAlign: "center",
+    fontSize: 13,
+    fontWeight: "500" 
   },
+
   section: {
     backgroundColor: "#fff",
     marginHorizontal: 20,
-    marginTop: 20,
+    marginBottom: 20,
     borderRadius: 12,
     padding: 20,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
+  
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
+    marginBottom: 15,
   },
-  seeAll: {
-    fontSize: 14,
-    color: "#007bff",
-    fontWeight: "500",
-  },
+
   actionsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
+  
   actionCard: {
     width: "48%",
     backgroundColor: "#f8f9fa",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 14,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
   },
+  
   actionIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  actionTitle: {
-    fontSize: 14,
+  
+  actionTitle: { 
+    fontSize: 14, 
+    fontWeight: "600", 
+    textAlign: "center",
+    color: "#333" 
+  },
+
+  systemInfo: {
+    paddingTop: 5,
+  },
+  
+  infoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f5f5f5",
+  },
+  
+  infoText: {
+    marginLeft: 12,
+    fontSize: 15,
+    color: "#555",
+    flex: 1,
+  },
+  
+  infoValue: {
     fontWeight: "600",
     color: "#333",
-    textAlign: "center",
-    marginBottom: 5,
   },
-  actionDescription: {
-    fontSize: 11,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 14,
-  },
-  alertCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderLeftWidth: 4,
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#eee",
-    borderRightWidth: 1,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-  },
-  alertMessage: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 14,
-    color: "#333",
-  },
-  activityItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  activityIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  activityInfo: {
-    flex: 1,
-  },
-  activityUser: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-  },
-  activityAction: {
-    fontSize: 13,
-    color: "#666",
-    marginTop: 2,
-  },
-  activityTime: {
-    fontSize: 12,
-    color: "#999",
-  },
-  systemInfo: {
-    backgroundColor: "#fff",
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 12,
-    padding: 15,
-    ...Platform.select({
-      web: {
-        boxShadow: '0px 2px 4px rgba(0,0,0,0.05)',
-      },
-      default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-      },
-    }),
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  infoText: {
-    marginLeft: 10,
-    fontSize: 13,
-    color: "#666",
-  },
+
   footer: {
     paddingVertical: 25,
     alignItems: "center",
     backgroundColor: "#fff",
-    marginTop: 20,
+    marginTop: 10,
     borderTopWidth: 1,
     borderTopColor: "#eee",
   },
+  
   footerText: {
     fontSize: 14,
     color: "#333",
     fontWeight: "500",
   },
+  
   footerSubtext: {
     fontSize: 12,
     color: "#666",
     marginTop: 5,
   },
-  modalContainer: {
+
+  /* ===== ESTILOS DEL MENÚ ===== */
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  
+  menu: {
+    backgroundColor: "#fff",
+    width: 300,
+    height: "100%",
+    paddingTop: 50,
+  },
+  
+  menuHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  
+  menuAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 15,
+  },
+  
+  avatarFallback: {
+    backgroundColor: "#6f42c1",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  
+  menuUserInfo: {
+    flex: 1,
+  },
+  
+  menuUserName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 3,
+  },
+  
+  menuUserRole: {
+    fontSize: 13,
+    color: "#666",
+  },
+  
+  menuDivider: {
+    height: 1,
+    backgroundColor: "#f0f0f0",
+    marginVertical: 10,
+  },
+  
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f8f8f8",
+  },
+  
+  menuItemIcon: {
+    width: 28,
+  },
+  
+  menuItemText: {
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 1,
+    marginLeft: 10,
+  },
+
+  /* ===== ESTILOS DEL MODAL DE CERRAR SESIÓN ===== */
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
   },
+  
   modalContent: {
     backgroundColor: "#fff",
-    borderRadius: 15,
+    borderRadius: 16,
     padding: 25,
     width: "85%",
     alignItems: "center",
   },
+  
+  modalIcon: {
+    marginBottom: 15,
+  },
+  
   modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -660,39 +682,48 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: "center",
   },
+  
   modalDescription: {
-    fontSize: 14,
+    fontSize: 15,
     color: "#666",
     textAlign: "center",
     marginBottom: 25,
-    lineHeight: 20,
+    lineHeight: 22,
   },
+  
   modalButtons: {
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
   },
+  
   modalButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
-    marginHorizontal: 5,
+    marginHorizontal: 6,
   },
+  
   cancelButton: {
     backgroundColor: "#f8f9fa",
     borderWidth: 1,
     borderColor: "#ddd",
   },
+  
   cancelButtonText: {
     color: "#666",
     fontWeight: "600",
+    fontSize: 15,
   },
+  
   confirmButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#F44336",
   },
+  
   confirmButtonText: {
     color: "#fff",
     fontWeight: "600",
+    fontSize: 15,
   },
 });

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Dimensions} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import WebIcon from "../../components/WebIcon";
 
 const { width } = Dimensions.get('window');
 
@@ -71,7 +71,7 @@ export default function HorarioScreen({ navigation, route }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#fff" />
+        <WebIcon name="arrow-left" size={24} color="#fff" />
       </TouchableOpacity>
       
       <Text style={styles.headerTitle}>Horario de Clases</Text>
@@ -80,7 +80,7 @@ export default function HorarioScreen({ navigation, route }) {
         style={styles.downloadButton}
         onPress={() => Alert.alert("Descargar", "Descargar horario en PDF")}
       >
-        <Icon name="download" size={22} color="#fff" />
+        <WebIcon name="download" size={22} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -90,7 +90,7 @@ export default function HorarioScreen({ navigation, route }) {
       {materiaEspecifica ? (
         <View style={styles.materiaEspecificaInfo}>
           <View style={[styles.materiaIconSmall, { backgroundColor: materiaEspecifica.color || "#2196F3" }]}>
-            <Icon name={materiaEspecifica.icon || "book"} size={20} color="#fff" />
+            <WebIcon name={materiaEspecifica.icon || "book"} size={20} color="#fff" />
           </View>
           <View style={styles.materiaInfoText}>
             <Text style={styles.materiaEspecificaTitle}>Horario de {materiaEspecifica.nombre}</Text>
@@ -109,7 +109,7 @@ export default function HorarioScreen({ navigation, route }) {
             style={styles.semanaButton}
             onPress={() => setSemanaActual(semanaActual - 1)}
           >
-            <Icon name="chevron-left" size={24} color="#2196F3" />
+            <WebIcon name="chevron-left" size={24} color="#2196F3" />
           </TouchableOpacity>
           
           <View style={styles.semanaTextContainer}>
@@ -126,7 +126,7 @@ export default function HorarioScreen({ navigation, route }) {
             style={styles.semanaButton}
             onPress={() => setSemanaActual(semanaActual + 1)}
           >
-            <Icon name="chevron-right" size={24} color="#2196F3" />
+            <WebIcon name="chevron-right" size={24} color="#2196F3" />
           </TouchableOpacity>
         </View>
       )}
@@ -137,7 +137,7 @@ export default function HorarioScreen({ navigation, route }) {
           style={[styles.vistaButton, vistaActual === 'semana' && styles.vistaButtonActive]}
           onPress={() => setVistaActual('semana')}
         >
-          <Icon name="calendar-week" size={20} color={vistaActual === 'semana' ? "#fff" : "#666"} />
+          <WebIcon name="calendar-week" size={20} color={vistaActual === 'semana' ? "#fff" : "#666"} />
           <Text style={[styles.vistaButtonText, vistaActual === 'semana' && styles.vistaButtonTextActive]}>
             Semana
           </Text>
@@ -147,7 +147,7 @@ export default function HorarioScreen({ navigation, route }) {
           style={[styles.vistaButton, vistaActual === 'dia' && styles.vistaButtonActive]}
           onPress={() => setVistaActual('dia')}
         >
-          <Icon name="calendar-today" size={20} color={vistaActual === 'dia' ? "#fff" : "#666"} />
+          <WebIcon name="calendar-today" size={20} color={vistaActual === 'dia' ? "#fff" : "#666"} />
           <Text style={[styles.vistaButtonText, vistaActual === 'dia' && styles.vistaButtonTextActive]}>
             Día
           </Text>
@@ -192,7 +192,7 @@ export default function HorarioScreen({ navigation, route }) {
             
             <View style={styles.claseHoraCompleta}>
               <Text style={styles.claseHoraCompletaText}>{clase.hora}</Text>
-              <Icon name="chevron-right" size={20} color="#999" />
+              <WebIcon name="chevron-right" size={20} color="#999" />
             </View>
           </TouchableOpacity>
         ))}
@@ -231,7 +231,7 @@ export default function HorarioScreen({ navigation, route }) {
               ))
             ) : (
               <View style={styles.sinClases}>
-                <Icon name="calendar-remove" size={24} color="#ccc" />
+                <WebIcon name="calendar-remove" size={24} color="#ccc" />
                 <Text style={styles.sinClasesText}>Sin clases</Text>
               </View>
             )}
@@ -321,7 +321,7 @@ export default function HorarioScreen({ navigation, route }) {
               onPress={() => navigation.navigate('Horario', { materiaEspecifica: materia })}
             >
               <View style={[styles.materiaIconResumen, { backgroundColor: materia.color }]}>
-                <Icon name={materia.icon} size={20} color="#fff" />
+                <WebIcon name={materia.icon} size={20} color="#fff" />
               </View>
               
               <View style={styles.materiaResumenInfo}>
@@ -343,13 +343,13 @@ export default function HorarioScreen({ navigation, route }) {
                 )}
               </View>
               
-              <Icon name="chevron-right" size={24} color="#999" />
+              <WebIcon name="chevron-right" size={24} color="#999" />
             </TouchableOpacity>
           );
         })
       ) : (
         <View style={styles.sinMaterias}>
-          <Icon name="book-off" size={40} color="#ccc" />
+          <WebIcon name="book-off" size={40} color="#ccc" />
           <Text style={styles.sinMateriasText}>No hay materias registradas</Text>
         </View>
       )}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, TextInput, Alert, Switch} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 import { getShadowStyle } from "../../utils/shadowStyles";
 
 export default function PeriodosAcademicos({ navigation }) {
@@ -62,7 +62,7 @@ export default function PeriodosAcademicos({ navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#333" />
+        <WebIcon name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Periodos Académicos</Text>
@@ -81,7 +81,7 @@ export default function PeriodosAcademicos({ navigation }) {
           setModalVisible(true);
         }}
       >
-        <Icon name="plus" size={24} color="#fff" />
+        <WebIcon name="plus" size={24} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -163,7 +163,7 @@ export default function PeriodosAcademicos({ navigation }) {
             <View style={styles.periodoInfo}>
               <Text style={styles.periodoNombre}>{periodo.nombre}</Text>
               <View style={styles.periodoDates}>
-                <Icon name="calendar" size={14} color="#666" />
+                <WebIcon name="calendar" size={14} color="#666" />
                 <Text style={styles.periodoFecha}>
                   {periodo.fechaInicio} - {periodo.fechaFin}
                 </Text>
@@ -173,7 +173,7 @@ export default function PeriodosAcademicos({ navigation }) {
               styles.periodoEstado,
               { backgroundColor: `${getEstadoColor(periodo.estado)}20` }
             ]}>
-              <Icon 
+              <WebIcon 
                 name={getEstadoIcon(periodo.estado)} 
                 size={16} 
                 color={getEstadoColor(periodo.estado)} 
@@ -189,17 +189,17 @@ export default function PeriodosAcademicos({ navigation }) {
 
           <View style={styles.periodoStats}>
             <View style={styles.statItem}>
-              <Icon name="account-group" size={16} color="#2196F3" />
+              <WebIcon name="account-group" size={16} color="#2196F3" />
               <Text style={styles.statValue}>{periodo.grupos}</Text>
               <Text style={styles.statLabel}>Grupos</Text>
             </View>
             <View style={styles.statItem}>
-              <Icon name="account" size={16} color="#4CAF50" />
+              <WebIcon name="account" size={16} color="#4CAF50" />
               <Text style={styles.statValue}>{periodo.alumnos}</Text>
               <Text style={styles.statLabel}>Alumnos</Text>
             </View>
             <View style={styles.statItem}>
-              <Icon 
+              <WebIcon 
                 name={periodo.inscripcionesAbiertas ? "lock-open" : "lock"} 
                 size={16} 
                 color={periodo.inscripcionesAbiertas ? "#FF9800" : "#666"} 
@@ -225,7 +225,7 @@ export default function PeriodosAcademicos({ navigation }) {
                 setModalVisible(true);
               }}
             >
-              <Icon name="pencil" size={18} color="#2196F3" />
+              <WebIcon name="pencil" size={18} color="#2196F3" />
               <Text style={styles.actionButtonText}>Editar</Text>
             </TouchableOpacity>
             
@@ -233,7 +233,7 @@ export default function PeriodosAcademicos({ navigation }) {
               style={styles.actionButton}
               onPress={() => handleDeletePeriodo(periodo.id)}
             >
-              <Icon name="delete" size={18} color="#F44336" />
+              <WebIcon name="delete" size={18} color="#F44336" />
               <Text style={styles.actionButtonText}>Eliminar</Text>
             </TouchableOpacity>
             
@@ -251,7 +251,7 @@ export default function PeriodosAcademicos({ navigation }) {
                   Alert.alert("Activado", "Periodo académico activado");
                 }}
               >
-                <Icon name="play" size={18} color="#4CAF50" />
+                <WebIcon name="play" size={18} color="#4CAF50" />
                 <Text style={styles.actionButtonText}>Activar</Text>
               </TouchableOpacity>
             )}
@@ -268,7 +268,7 @@ export default function PeriodosAcademicos({ navigation }) {
         {renderPeriodosLista()}
         
         <View style={styles.infoBox}>
-          <Icon name="information" size={24} color="#2196F3" />
+          <WebIcon name="information" size={24} color="#2196F3" />
           <View style={styles.infoContent}>
             <Text style={styles.infoTitle}>Información Importante</Text>
             <Text style={styles.infoText}>

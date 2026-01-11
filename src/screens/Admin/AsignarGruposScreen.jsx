@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { SafeAreaView, View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Modal, TextInput, Alert} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import WebIcon from "../../components/WebIcon";
 import { getShadowStyle } from "../../utils/shadowStyles"; // Asegúrate de crear esta utilidad
 
 export default function AsignarGruposScreen({ navigation }) {
@@ -57,7 +57,7 @@ export default function AsignarGruposScreen({ navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Icon name="arrow-left" size={24} color="#333" />
+        <WebIcon name="arrow-left" size={24} color="#333" />
       </TouchableOpacity>
       <View style={styles.headerTitleContainer}>
         <Text style={styles.headerTitle}>Asignar Grupos</Text>
@@ -67,7 +67,7 @@ export default function AsignarGruposScreen({ navigation }) {
         style={styles.filterButton}
         onPress={() => Alert.alert("Filtros", "Opciones de filtrado")}
       >
-        <Icon name="filter" size={24} color="#333" />
+        <WebIcon name="filter" size={24} color="#333" />
       </TouchableOpacity>
     </View>
   );
@@ -80,7 +80,7 @@ export default function AsignarGruposScreen({ navigation }) {
           <View key={grupo.id} style={[styles.grupoCard, getShadowStyle()]}>
             <View style={styles.grupoHeader}>
               <View style={styles.grupoIconContainer}>
-                <Icon name="account-group" size={24} color="#2196F3" />
+                <WebIcon name="account-group" size={24} color="#2196F3" />
               </View>
               <View style={styles.grupoInfo}>
                 <Text style={styles.grupoNombre}>{grupo.nombre}</Text>
@@ -137,7 +137,7 @@ export default function AsignarGruposScreen({ navigation }) {
           >
             <View style={styles.alumnoInfo}>
               <View style={styles.alumnoAvatar}>
-                <Icon name="account" size={20} color="#fff" />
+                <WebIcon name="account" size={20} color="#fff" />
               </View>
               <View style={styles.alumnoDetails}>
                 <Text style={styles.alumnoNombre}>{item.nombre}</Text>
@@ -146,13 +146,13 @@ export default function AsignarGruposScreen({ navigation }) {
               </View>
             </View>
             <View style={styles.alumnoActions}>
-              <Icon name="account-plus" size={24} color="#2196F3" />
+              <WebIcon name="account-plus" size={24} color="#2196F3" />
             </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Icon name="check-circle" size={50} color="#4CAF50" />
+            <WebIcon name="check-circle" size={50} color="#4CAF50" />
             <Text style={styles.emptyText}>Todos los alumnos tienen grupo asignado</Text>
           </View>
         }
@@ -196,7 +196,7 @@ export default function AsignarGruposScreen({ navigation }) {
                       {item.materia} • {item.alumnos}/{item.capacidad} alumnos
                     </Text>
                   </View>
-                  <Icon name="chevron-right" size={24} color="#666" />
+                  <WebIcon name="chevron-right" size={24} color="#666" />
                 </TouchableOpacity>
               )}
             />

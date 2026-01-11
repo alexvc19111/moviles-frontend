@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, ScrollView,  TouchableOpacity, Alert} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import WebIcon from "../../components/WebIcon";
 
 export default function CalificacionesScreen({ navigation, route }) {
   // Obtener parámetros si vienen del HomeAlumno
@@ -163,7 +163,7 @@ export default function CalificacionesScreen({ navigation, route }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-left" size={24} color="#fff" />
+          <WebIcon name="arrow-left" size={24} color="#fff" />
         </TouchableOpacity>
         
         <View style={styles.headerContent}>
@@ -176,7 +176,7 @@ export default function CalificacionesScreen({ navigation, route }) {
           style={styles.homeButton}
           onPress={() => navigation.navigate('HomeAlumno')}
         >
-          <Icon name="home" size={22} color="#fff" />
+          <WebIcon name="home" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -197,7 +197,7 @@ export default function CalificacionesScreen({ navigation, route }) {
               Alert.alert("Historial", "Historial completo de calificaciones");
             }}
           >
-            <Icon name="history" size={18} color="#4CAF50" />
+            <WebIcon name="history" size={18} color="#4CAF50" />
             <Text style={styles.fullHistoryText}>Ver historial completo</Text>
           </TouchableOpacity>
         </View>
@@ -205,7 +205,7 @@ export default function CalificacionesScreen({ navigation, route }) {
         {/* Indicador si es una materia específica */}
         {materia && (
           <View style={styles.specificSubjectIndicator}>
-            <Icon name="information" size={20} color="#2196F3" />
+            <WebIcon name="information" size={20} color="#2196F3" />
             <Text style={styles.specificSubjectText}>
               Mostrando calificaciones de: <Text style={styles.subjectHighlight}>{materia.nombre}</Text>
             </Text>
@@ -241,7 +241,7 @@ export default function CalificacionesScreen({ navigation, route }) {
                 ]}
                 onPress={() => setSelectedSubject(subject.name || subject.nombre)}
               >
-                <Icon 
+                <WebIcon 
                   name={getSubjectIcon(subject.name || subject.nombre)} 
                   size={24} 
                   color="#fff" 
@@ -266,7 +266,7 @@ export default function CalificacionesScreen({ navigation, route }) {
           <View style={styles.gradesHeader}>
             <View style={styles.selectedSubjectHeader}>
               <View style={[styles.selectedSubjectIcon, { backgroundColor: getSubjectColor(selectedSubject) }]}>
-                <Icon name={getSubjectIcon(selectedSubject)} size={24} color="#fff" />
+                <WebIcon name={getSubjectIcon(selectedSubject)} size={24} color="#fff" />
               </View>
               <View>
                 <Text style={styles.gradesTitle}>
@@ -281,7 +281,7 @@ export default function CalificacionesScreen({ navigation, route }) {
               style={styles.downloadButton}
               onPress={() => Alert.alert("Descargar", "Descargando calificaciones...")}
             >
-              <Icon name="download" size={20} color="#2196F3" />
+              <WebIcon name="download" size={20} color="#2196F3" />
             </TouchableOpacity>
           </View>
 
@@ -311,13 +311,13 @@ export default function CalificacionesScreen({ navigation, route }) {
 
                   <View style={styles.gradeDetails}>
                     <View style={styles.gradeDetailItem}>
-                      <Icon name="weight" size={16} color="#999" />
+                      <WebIcon name="weight" size={16} color="#999" />
                       <Text style={styles.gradeDetailText}>
                         Peso: {grade.weight || 'No especificado'}
                       </Text>
                     </View>
                     <View style={styles.gradeDetailItem}>
-                      <Icon name="calculator" size={16} color="#999" />
+                      <WebIcon name="calculator" size={16} color="#999" />
                       <Text style={styles.gradeDetailText}>
                         Estado: {(grade.grade || grade.calificacion || 0) >= 6 ? '✅ Aprobado' : '❌ Reprobado'}
                       </Text>
@@ -328,7 +328,7 @@ export default function CalificacionesScreen({ navigation, route }) {
             </View>
           ) : (
             <View style={styles.noGradesContainer}>
-              <Icon name="file-document-outline" size={50} color="#ccc" />
+              <WebIcon name="file-document-outline" size={50} color="#ccc" />
               <Text style={styles.noGradesTitle}>Sin calificaciones</Text>
               <Text style={styles.noGradesText}>
                 No hay calificaciones registradas para esta materia.

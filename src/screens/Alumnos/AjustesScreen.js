@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView,  View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, TextInput, Modal, ActivityIndicator} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import WebIcon from "../../components/WebIcon";
 
 const AjustesScreen = ({ navigation, route }) => {
   // ¡CORREGIR: Proporcionar valores por defecto para route!
@@ -28,7 +28,7 @@ const AjustesScreen = ({ navigation, route }) => {
   if (hasError) {
     return (
       <SafeAreaView style={styles.errorContainer}>
-        <Icon name="alert-circle" size={60} color="#FF6B6B" />
+        <WebIcon name="alert-circle" size={60} color="#FF6B6B" />
         <Text style={styles.errorText}>Algo salió mal en la pantalla de ajustes</Text>
         <TouchableOpacity 
           style={styles.retryButton}
@@ -112,7 +112,7 @@ const AjustesScreen = ({ navigation, route }) => {
           onPress={() => navigation.goBack()} 
           style={styles.backButton}
         >
-          <Icon name="arrow-left" size={24} color="#2196F3" />
+          <WebIcon name="arrow-left" size={24} color="#2196F3" />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, textStyle]}>
           Ajustes
@@ -132,7 +132,7 @@ const AjustesScreen = ({ navigation, route }) => {
           
           <View style={[styles.profileCard, cardStyle]}>
             <View style={styles.avatarContainer}>
-              <Icon name="account-school" size={70} color="#2196F3" />
+              <WebIcon name="account-school" size={70} color="#2196F3" />
             </View>
             
             <View style={styles.profileInfo}>
@@ -151,7 +151,7 @@ const AjustesScreen = ({ navigation, route }) => {
                       onPress={guardarNombre} 
                       style={[styles.iconButton, styles.saveButton]}
                     >
-                      <Icon name="check" size={22} color="#4CAF50" />
+                      <WebIcon name="check" size={22} color="#4CAF50" />
                     </TouchableOpacity>
                     <TouchableOpacity 
                       onPress={() => {
@@ -160,7 +160,7 @@ const AjustesScreen = ({ navigation, route }) => {
                       }} 
                       style={[styles.iconButton, styles.cancelButton]}
                     >
-                      <Icon name="close" size={22} color="#F44336" />
+                      <WebIcon name="close" size={22} color="#F44336" />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -171,7 +171,7 @@ const AjustesScreen = ({ navigation, route }) => {
                     onPress={() => setEditarNombre(true)} 
                     style={styles.editButton}
                   >
-                    <Icon name="pencil" size={20} color="#2196F3" />
+                    <WebIcon name="pencil" size={20} color="#2196F3" />
                   </TouchableOpacity>
                 </View>
               )}
@@ -180,11 +180,11 @@ const AjustesScreen = ({ navigation, route }) => {
               
               <View style={styles.userDetails}>
                 <View style={styles.detailRow}>
-                  <Icon name="identifier" size={16} color="#757575" />
+                  <WebIcon name="identifier" size={16} color="#757575" />
                   <Text style={styles.detailText}>Matrícula: {usuarioActivo.matricula}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                  <Icon name="book-education" size={16} color="#757575" />
+                  <WebIcon name="book-education" size={16} color="#757575" />
                   <Text style={styles.detailText}>Carrera: {usuarioActivo.carrera}</Text>
                 </View>
               </View>
@@ -200,7 +200,7 @@ const AjustesScreen = ({ navigation, route }) => {
           
           <View style={styles.preferenceItem}>
             <View style={styles.preferenceLeft}>
-              <Icon name="bell-outline" size={26} color="#666" />
+              <WebIcon name="bell-outline" size={26} color="#666" />
               <View>
                 <Text style={[styles.preferenceText, textStyle]}>
                   Notificaciones
@@ -220,7 +220,7 @@ const AjustesScreen = ({ navigation, route }) => {
 
           <View style={styles.preferenceItem}>
             <View style={styles.preferenceLeft}>
-              <Icon name="theme-light-dark" size={26} color="#666" />
+              <WebIcon name="theme-light-dark" size={26} color="#666" />
               <View>
                 <Text style={[styles.preferenceText, textStyle]}>
                   Modo oscuro
@@ -243,7 +243,7 @@ const AjustesScreen = ({ navigation, route }) => {
             onPress={() => setModalVisible(true)}
           >
             <View style={styles.preferenceLeft}>
-              <Icon name="translate" size={26} color="#666" />
+              <WebIcon name="translate" size={26} color="#666" />
               <View>
                 <Text style={[styles.preferenceText, textStyle]}>
                   Idioma
@@ -257,7 +257,7 @@ const AjustesScreen = ({ navigation, route }) => {
               <Text style={styles.languageText}>
                 {idioma === 'es' ? 'Español' : 'English'}
               </Text>
-              <Icon name="chevron-right" size={22} color="#999" />
+              <WebIcon name="chevron-right" size={22} color="#999" />
             </View>
           </TouchableOpacity>
         </View>
@@ -267,7 +267,7 @@ const AjustesScreen = ({ navigation, route }) => {
           style={styles.logoutButton}
           onPress={handleLogout}
         >
-          <Icon name="logout" size={22} color="#F44336" />
+          <WebIcon name="logout" size={22} color="#F44336" />
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
 
@@ -300,7 +300,7 @@ const AjustesScreen = ({ navigation, route }) => {
               onPress={() => cambiarIdioma('es')}
             >
               <View style={styles.modalOptionLeft}>
-                <Icon name="flag" size={24} color="#2196F3" />
+                <WebIcon name="flag" size={24} color="#2196F3" />
                 <Text style={[
                   styles.modalOptionText, 
                   idioma === 'es' && styles.selectedText,
@@ -310,7 +310,7 @@ const AjustesScreen = ({ navigation, route }) => {
                 </Text>
               </View>
               {idioma === 'es' && (
-                <Icon name="check-circle" size={24} color="#4CAF50" />
+                <WebIcon name="check-circle" size={24} color="#4CAF50" />
               )}
             </TouchableOpacity>
 
@@ -323,7 +323,7 @@ const AjustesScreen = ({ navigation, route }) => {
               onPress={() => cambiarIdioma('en')}
             >
               <View style={styles.modalOptionLeft}>
-                <Icon name="flag" size={24} color="#F44336" />
+                <WebIcon name="flag" size={24} color="#F44336" />
                 <Text style={[
                   styles.modalOptionText, 
                   idioma === 'en' && styles.selectedText,
@@ -333,7 +333,7 @@ const AjustesScreen = ({ navigation, route }) => {
                 </Text>
               </View>
               {idioma === 'en' && (
-                <Icon name="check-circle" size={24} color="#4CAF50" />
+                <WebIcon name="check-circle" size={24} color="#4CAF50" />
               )}
             </TouchableOpacity>
 
