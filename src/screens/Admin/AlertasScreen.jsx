@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {SafeAreaView, View, Text, StyleSheet,ScrollView, TouchableOpacity, FlatList, Alert, Switch, RefreshControl} from "react-native";
 import WebIcon from "../../components/WebIcon";
 import { getShadowStyle } from "../../utils/shadowStyles";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function AlertasScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);

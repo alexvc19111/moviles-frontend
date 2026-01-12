@@ -1,81 +1,86 @@
 import React, { useState } from "react";
-import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator} from "react-native";
+import {
+  SafeAreaView,
+  View,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Image
+} from "react-native";
+// 👇 IMPORTAMOS HelperText y Snackbar
+import { Text, TextInput, Button, useTheme, Surface, HelperText, Snackbar } from "react-native-paper";
+import { useGlobalContext } from "../context/GlobalContext";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // --- NUEVOS ESTADOS PARA FEEDBACK ---
+  const [emailError, setEmailError] = useState(false);      // ¿El email está vacío?
+  const [passError, setPassError] = useState(false);        // ¿La clave está vacía?
+  const [snackVisible, setSnackVisible] = useState(false);  // Mostrar barra inferior
+  const [snackMessage, setSnackMessage] = useState("");     // Mensaje del servidor
 
-  // Usuarios de prueba
-  const testUsers = [
-    {
-      email: "alumno@escuela.com",
-      password: "123456",
-      role: "alumno",
-      name: "Juan Pérez",
-    },
-    {
-      email: "profesor@escuela.com",
-      password: "123456",
-      role: "profesor",
-      name: "María García",
-    },
-    {
-      email: "admin@escuela.com",
-      password: "admin123",
-      role: "admin",
-      name: "Admin Sistema",
-    },
-  ];
+  const { login, t } = useGlobalContext();
+  const theme = useTheme(); 
 
-  const handleLogin = () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Por favor completa todos los campos");
-      return;
+  const demoUsers = {
+    alumno: { email: "e1315736908@live.uleam.edu.ec", password: "sandino" }, // Ajusta a tus datos reales
+    docente: { email: "docente@escuela.com", password: "password" },
+    admin: { email: "admin@escuela.com", password: "password" },
+  };
+
+  const handleLogin = async () => {
+    // 1. Resetear errores previos
+    setEmailError(false);
+    setPassError(false);
+
+    // 2. Validación Local (Campos vacíos)
+    let hasError = false;
+    if (!email.trim()) {
+      setEmailError(true);
+      hasError = true;
     }
+    if (!password.trim()) {
+      setPassError(true);
+      hasError = true;
+    }
+
+    if (hasError) return; // Si hay error visual, no llamamos a la API
 
     setLoading(true);
 
-    setTimeout(() => {
-      const user = testUsers.find(
-        (u) => u.email === email && u.password === password
-      );
-
+    try {
+      // 3. Intentar Login
+      await login(email, password);
+      // Si pasa, el AppNavigator cambia la pantalla solo.
+      
+    } catch (error) {
+      // 4. CAPTURAR ERROR DEL SERVIDOR
+      const mensajeServidor = error.response?.data?.message || "Credenciales incorrectas";
+      setSnackMessage(mensajeServidor);
+      setSnackVisible(true); // Mostrar Snackbar
+    } finally {
       setLoading(false);
-
-      if (!user) {
-        Alert.alert("Error", "Credenciales incorrectas");
-        return;
-      }
-
-      console.log("Usuario logueado:", user);
-
-      // Alerta solo informativa (NO navegación aquí)
-      Alert.alert("¡Bienvenido!", `Hola ${user.name}`);
-
-      // 🔥 Navegación segura (WEB + MÓVIL)
-      if (user.role === "admin") {
-        navigation.replace("HomeAdmin", { user });
-      } else if (user.role === "alumno") {
-        navigation.replace("HomeAlumno", { user });
-      } else if (user.role === "profesor") {
-        navigation.replace("HomeProfesor", { user });
-      }
-    }, 1200);
+    }
   };
 
   const handleQuickLogin = (type) => {
-    const demo = testUsers.find((u) => u.role === type);
-    if (!demo) return;
-
-    setEmail(demo.email);
-    setPassword(demo.password);
-    Alert.alert("Demo", `Credenciales de ${demo.role} cargadas`);
+    const demo = demoUsers[type];
+    if (demo) {
+      setEmail(demo.email);
+      setPassword(demo.password);
+      // Limpiamos errores al usar demo
+      setEmailError(false); 
+      setPassError(false);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -86,184 +91,177 @@ export default function LoginScreen({ navigation }) {
         >
           {/* LOGO */}
           <View style={styles.logoContainer}>
-            <View style={styles.logoCircle}>
-              <Text style={styles.logoText}>🏫</Text>
+            <View style={[styles.logoCircle, { backgroundColor: theme.colors.primary }]}>
+              <Text style={{ fontSize: 48 }}>🏫</Text>
             </View>
-            <Text style={styles.title}>Sistema Escolar</Text>
-            <Text style={styles.subtitle}>Gestión Académica</Text>
+            <Text variant="headlineMedium" style={{ fontWeight: "bold", color: theme.colors.onBackground }}>
+              {t('general.sistema', { defaultValue: 'Sistema Escolar' })}
+            </Text>
+            <Text variant="bodyLarge" style={{ color: theme.colors.secondary }}>
+              Gestión Académica
+            </Text>
           </View>
 
-          {/* FORM */}
-          <View style={styles.form}>
-            <Text style={styles.formTitle}>Ingresar</Text>
+          {/* FORMULARIO */}
+          <Surface style={[styles.form, { backgroundColor: theme.colors.surface }]} elevation={2}>
+            <Text variant="headlineSmall" style={[styles.formTitle, { color: theme.colors.onSurface }]}>
+              {t('login.titulo')}
+            </Text>
 
-            <Text style={styles.label}>Correo Electrónico</Text>
+            {/* INPUT EMAIL */}
             <TextInput
-              style={styles.input}
-              placeholder="admin@escuela.com"
+              label={t('login.usuario')}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                if(text) setEmailError(false); // Quitar error mientras escribe
+              }}
+              mode="outlined"
               autoCapitalize="none"
-              editable={!loading}
-            />
-
-            <Text style={styles.label}>Contraseña</Text>
-            <View style={styles.passwordRow}>
-              <TextInput
-                style={[styles.input, { flex: 1 }]}
-                placeholder="••••••••"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                editable={!loading}
-              />
-              <TouchableOpacity
-                style={styles.eye}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Text style={{ fontSize: 18 }}>
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.loginButton, loading && { opacity: 0.7 }]}
-              onPress={handleLogin}
+              keyboardType="email-address"
+              style={styles.input}
               disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.loginText}>Ingresar</Text>
-              )}
-            </TouchableOpacity>
+              error={emailError} // <--- Pone el borde rojo
+              left={<TextInput.Icon icon="email" />}
+            />
+            {/* TEXTO DE ERROR EMAIL */}
+            <HelperText type="error" visible={emailError}>
+              El correo es obligatorio.
+            </HelperText>
 
-            {/* DEMO */}
-            <View style={styles.demoBox}>
-              <Text style={styles.demoTitle}>Credenciales de Demo</Text>
+            {/* INPUT PASSWORD */}
+            <TextInput
+              label={t('login.contraseña')}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                if(text) setPassError(false);
+              }}
+              mode="outlined"
+              secureTextEntry={!showPassword}
+              style={styles.input}
+              disabled={loading}
+              error={passError} // <--- Pone el borde rojo
+              left={<TextInput.Icon icon="lock" />}
+              right={
+                <TextInput.Icon 
+                  icon={showPassword ? "eye-off" : "eye"} 
+                  onPress={() => setShowPassword(!showPassword)} 
+                />
+              }
+            />
+            {/* TEXTO DE ERROR PASSWORD */}
+            <HelperText type="error" visible={passError}>
+              La contraseña es obligatoria.
+            </HelperText>
+
+            <Button 
+              mode="contained" 
+              onPress={handleLogin} 
+              loading={loading}
+              disabled={loading}
+              style={styles.loginButton}
+              contentStyle={{ paddingVertical: 5 }}
+            >
+              {loading ? t('login.cargando') : t('login.ingresar')}
+            </Button>
+
+            {/* DEMO BUTTONS */}
+            <View style={[styles.demoBox, { backgroundColor: theme.colors.elevation.level1 }]}>
+              <Text variant="labelMedium" style={{ textAlign: "center", marginBottom: 10, color: theme.colors.onSurfaceVariant }}>
+                Credenciales de Demo
+              </Text>
               <View style={styles.demoRow}>
-                <TouchableOpacity
-                  style={[styles.demoBtn, { backgroundColor: "#4CAF50" }]}
-                  onPress={() => handleQuickLogin("alumno")}
-                >
-                  <Text style={styles.demoText}>Alumno</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.demoBtn, { backgroundColor: "#2196F3" }]}
-                  onPress={() => handleQuickLogin("profesor")}
-                >
-                  <Text style={styles.demoText}>Profesor</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.demoBtn, { backgroundColor: "#FF9800" }]}
-                  onPress={() => handleQuickLogin("admin")}
-                >
-                  <Text style={styles.demoText}>Admin</Text>
-                </TouchableOpacity>
+                <Button mode="contained-tonal" compact onPress={() => handleQuickLogin("alumno")}>
+                  Alumno
+                </Button>
+                <Button mode="contained-tonal" compact onPress={() => handleQuickLogin("docente")}>
+                  Docente
+                </Button>
+                <Button mode="contained-tonal" compact onPress={() => handleQuickLogin("admin")}>
+                  Admin
+                </Button>
               </View>
             </View>
 
             {/* LINKS */}
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Register")}
+            <Button 
+              mode="text" 
+              onPress={() => navigation.navigate("Register")} 
               disabled={loading}
+              style={{ marginTop: 10 }}
             >
-              <Text style={styles.link}>Crear cuenta nueva</Text>
-            </TouchableOpacity>
+              {t('login.crearCuenta')}
+            </Button>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate("Recuperar Contraseña")}
+            <Button 
+              mode="text" 
+              onPress={() => navigation.navigate("Recuperar Contraseña")} 
               disabled={loading}
+              compact
             >
-              <Text style={styles.link}>¿Olvidaste tu contraseña?</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.version}>
-              Versión 1.0.0 • Modo demostración
-            </Text>
-          </View>
+              {t('login.olvideContraseña')}
+            </Button>
+          </Surface>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* SNACKBAR (Mensajes flotantes de error) */}
+      <Snackbar
+        visible={snackVisible}
+        onDismiss={() => setSnackVisible(false)}
+        duration={3000}
+        action={{
+          label: 'OK',
+          onPress: () => setSnackVisible(false),
+        }}
+        style={{ backgroundColor: theme.colors.error }} // Fondo rojo para errores
+      >
+        {snackMessage}
+      </Snackbar>
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#f5f5f5" },
+  safeArea: { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: "center", padding: 20 },
-  logoContainer: { alignItems: "center", marginBottom: 40 },
+  logoContainer: { alignItems: "center", marginBottom: 30 },
   logoCircle: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: "#007bff",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 15,
   },
-  logoText: { fontSize: 48 },
-  title: { fontSize: 26, fontWeight: "bold", color: "#333" },
-  subtitle: { fontSize: 15, color: "#666" },
   form: {
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 25,
   },
   formTitle: {
-    fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 25,
+    marginBottom: 20,
   },
-  label: { fontSize: 14, color: "#555", marginBottom: 6 },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    backgroundColor: "#f9f9f9",
+    // Quitamos marginBottom grande porque ahora está el HelperText
+    marginTop: 5, 
+    backgroundColor: 'transparent'
   },
-  passwordRow: { flexDirection: "row", alignItems: "center" },
-  eye: { padding: 10 },
   loginButton: {
-    backgroundColor: "#007bff",
-    padding: 18,
-    borderRadius: 10,
-    alignItems: "center",
-    marginVertical: 10,
+    marginTop: 15,
+    borderRadius: 8,
   },
-  loginText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
   demoBox: {
-    backgroundColor: "#f8f9fa",
     borderRadius: 10,
     padding: 15,
     marginVertical: 20,
   },
-  demoTitle: {
-    textAlign: "center",
-    marginBottom: 10,
-    color: "#666",
-  },
-  demoRow: { flexDirection: "row", justifyContent: "space-around" },
-  demoBtn: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  demoText: { color: "#fff", fontSize: 12, fontWeight: "bold" },
-  link: {
-    color: "#007bff",
-    textAlign: "center",
-    marginTop: 10,
-    fontWeight: "500",
-  },
-  version: {
-    textAlign: "center",
-    fontSize: 12,
-    color: "#999",
-    marginTop: 25,
+  demoRow: { 
+    flexDirection: "row", 
+    justifyContent: "space-between",
+    gap: 5
   },
 });
-

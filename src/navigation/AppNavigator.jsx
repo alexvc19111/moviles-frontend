@@ -1,5 +1,8 @@
 import React from "react";
+import { View, ActivityIndicator } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useGlobalContext } from "../context/GlobalContext"; // Importamos el contexto
+
 
 // Auth
 import LoginScreen from "../screens/LoginScreen";
@@ -28,7 +31,7 @@ import AsignarGruposScreen from "../screens/Admin/AsignarGruposScreen";
 import PeriodosAcademicosScreen from "../screens/Admin/PeriodosAcademicosScreen";
 import EditarPerfil from "../screens/Admin/EditarPerfil";
 
-//Profesor
+// PROFESOR
 import HomeProfesorScreen from "../screens/Profesor/HomeProfesorScreen";
 import CalificarTareasScreen from "../screens/Profesor/CalificarTareasScreen";
 import EnviarComunicadoScreen from "../screens/Profesor/EnviarComunicadoScreen";
@@ -38,24 +41,30 @@ import NuevaTareaScreen from "../screens/Profesor/NuevaTareaScreen";
 import SubirCalificacionesScreen from "../screens/Profesor/SubirCalificacionesScreen";
 import TomarAsistenciaScreen from "../screens/Profesor/TomarAsistenciaScreen";
 
+
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+  // 1. Obtenemos el estado del usuario desde el contexto
+  const { user, loadingAuth } = useGlobalContext();
+
+  // 2. Pantalla de carga (mientras verifica si hay sesión guardada en el celular)
+  if (loadingAuth) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#6200ee" />
+      </View>
+    );
+  }
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
 
       {/* AUTH */}
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="Recuperar Contraseña" component={ForgotPasswordScreen} />
-      {/* ALUMNOS */}
-      <Stack.Screen name="HomeAlumno" component={HomeAlumnoScreen} />
-      <Stack.Screen name="Calificaciones" component={CalificacionesScreen} />
-      <Stack.Screen name="Horario" component={HorarioScreen} />
-      <Stack.Screen name="PerfilAlumno" component={PerfilAlumnoScreen} />
-      <Stack.Screen name="Asistencias" component={AsistenciasScreen} />
-      <Stack.Screen name="Materias" component={MateriasScreen} />
-      <Stack.Screen name="Ajustes" component={AjustesScreen} />
+      <Stack.Screen name="RecuperarContraseña" component={ForgotPasswordScreen} />
+
       
    {/* PROFESOR */}
    <Stack.Screen name="HomeProfesor" component={HomeProfesorScreen} />
@@ -80,8 +89,16 @@ export default function AppNavigator() {
       <Stack.Screen name="PeriodosAcademicos" component={PeriodosAcademicosScreen} />
       <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
 
-    
-
-    </Stack.Navigator>
+      {/*ALUMNOS */}
+      <Stack.Screen name="HomeAlumno" component={HomeAlumnoScreen} />
+      <Stack.Screen name="Calificaciones" component={CalificacionesScreen} />
+      <Stack.Screen name="Horario" component={HorarioScreen} />
+      <Stack.Screen name="PerfilAlumno" component={PerfilAlumnoScreen} />
+      <Stack.Screen name="Asistencias" component={AsistenciasScreen} />
+      <Stack.Screen name="Materias" component={MateriasScreen} />
+      <Stack.Screen name="Ajustes" component={AjustesScreen} />
+      </Stack.Navigator>
   );
 }
+
+    

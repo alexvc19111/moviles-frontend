@@ -1,16 +1,28 @@
 import React, { useState } from "react";
-import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator} from "react-native";
-import WebIcon from "../components/WebIcon";
+import {
+  SafeAreaView,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { 
+  Text, TextInput, Button, useTheme, HelperText, 
+  Portal, Dialog, Paragraph, ActivityIndicator 
+} from "react-native-paper";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useGlobalContext } from "../context/GlobalContext";
 
 export default function RegisterScreen({ navigation }) {
-  // Estados
+  const { apiRequest } = useGlobalContext();
+  const theme = useTheme();
+
+  // Estados del formulario
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
+    nombre: "", 
     correo: "",
-    matricula: "",
-    telefono: "",
-    carrera: "",
     contraseña: "",
     confirmarContraseña: "",
   });
@@ -19,606 +31,254 @@ export default function RegisterScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedRole, setSelectedRole] = useState("alumno");
-
-  // Roles disponibles
-  const roles = [
-    { id: "alumno", label: "Alumno", icon: "school" },
-    { id: "profesor", label: "Profesor", icon: "teach" },
-    { id: "administrativo", label: "Administrativo", icon: "account-tie" },
-  ];
+  
+  // Estado para el Modal de Éxito
+  const [successVisible, setSuccessVisible] = useState(false);
 
   // Validaciones
   const validateForm = () => {
     const newErrors = {};
+    if (!formData.nombre.trim()) newErrors.nombre = "El nombre es obligatorio.";
 
-    // Validar nombre
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es requerido";
-    } else if (formData.nombre.length < 2) {
-      newErrors.nombre = "Mínimo 2 caracteres";
-    }
-
-    // Validar apellido
-    if (!formData.apellido.trim()) {
-      newErrors.apellido = "El apellido es requerido";
-    }
-
-    // Validar correo
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.correo.trim()) {
-      newErrors.correo = "El correo es requerido";
+      newErrors.correo = "El correo es obligatorio.";
     } else if (!emailRegex.test(formData.correo)) {
-      newErrors.correo = "Correo electrónico inválido";
+      newErrors.correo = "Correo inválido.";
+    } else if (!formData.correo.includes("uleam.edu.ec")) {
+      newErrors.correo = "Debe ser un correo institucional (@uleam.edu.ec).";
     }
 
-    // Validar matrícula (solo para alumnos)
-    if (selectedRole === "alumno" && !formData.matricula.trim()) {
-      newErrors.matricula = "La matrícula es requerida";
-    }
-
-    // Validar teléfono
-    const phoneRegex = /^[0-9]{10}$/;
-    if (formData.telefono && !phoneRegex.test(formData.telefono.replace(/\D/g, ''))) {
-      newErrors.telefono = "Teléfono inválido (10 dígitos)";
-    }
-
-    // Validar contraseña
     if (!formData.contraseña) {
-      newErrors.contraseña = "La contraseña es requerida";
-    } else if (formData.contraseña.length < 8) {
-      newErrors.contraseña = "Mínimo 8 caracteres";
-    } else if (!/(?=.*[0-9])(?=.*[A-Z])/.test(formData.contraseña)) {
-      newErrors.contraseña = "Debe incluir mayúscula y número";
+      newErrors.contraseña = "La contraseña es obligatoria.";
+    } else if (formData.contraseña.length < 6) {
+      newErrors.contraseña = "Mínimo 6 caracteres.";
     }
 
-    // Validar confirmación de contraseña
-    if (!formData.confirmarContraseña) {
-      newErrors.confirmarContraseña = "Confirma tu contraseña";
-    } else if (formData.contraseña !== formData.confirmarContraseña) {
-      newErrors.confirmarContraseña = "Las contraseñas no coinciden";
+    if (formData.contraseña !== formData.confirmarContraseña) {
+      newErrors.confirmarContraseña = "Las contraseñas no coinciden.";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Manejar cambio en inputs
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Limpiar error del campo al escribir
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: "" }));
-    }
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: "" }));
   };
 
-  // Formatear teléfono
-  const formatPhone = (input) => {
-    const numbers = input.replace(/\D/g, '');
-    if (numbers.length <= 3) return numbers;
-    if (numbers.length <= 6) return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
-    return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
-  };
-
-  // Simular registro
   const handleRegister = async () => {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    try {
+      const payload = {
+        nombre: formData.nombre,
+        correo: formData.correo,
+        contraseña: formData.contraseña
+      };
 
-    // Simular llamada a API
-    setTimeout(() => {
-      setIsLoading(false);
+      // 🚫 ELIMINADO: Ya no mostramos el payload en consola por seguridad
+      // console.log("📨 Enviando registro:", payload); 
+
+      // 1. Enviamos a la API
+      await apiRequest('/register', 'POST', payload);
+
+      // 2. Limpiamos el formulario (visual)
+      setFormData({
+        nombre: "",
+        correo: "",
+        contraseña: "",
+        confirmarContraseña: ""
+      });
+
+      // 3. Mostramos el Modal de Éxito
+      setSuccessVisible(true);
+
+      // 4. TEMPORIZADOR PARA REDIRIGIR AUTOMÁTICAMENTE
+      setTimeout(() => {
+        setSuccessVisible(false); // Cerramos modal
+        navigation.navigate("Login"); // Redirigimos
+      }, 2500); // Espera 2.5 segundos antes de cambiar
+
+    } catch (error) {
+      console.error("❌ Error Registro:", error); // Solo mostramos el error, no los datos
+      const msg = error.response?.data?.message || "No se pudo crear la cuenta.";
       
-      Alert.alert(
-        "¡Registro Exitoso!",
-        `Bienvenido ${formData.nombre} ${formData.apellido}\nTu cuenta como ${selectedRole} ha sido creada.\nRevisa tu correo para confirmar tu cuenta.`,
-        [
-          {
-            text: "Continuar",
-            onPress: () => navigation.navigate("Login", {
-              autoEmail: formData.correo,
-              autoPassword: formData.contraseña
-            })
-          }
-        ]
-      );
-    }, 2000);
-  };
-
-  // Campos específicos por rol
-  const getRoleSpecificFields = () => {
-    switch (selectedRole) {
-      case "alumno":
-        return (
-          <>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Matrícula *</Text>
-              <View style={styles.inputWrapper}>
-                <WebIcon name="identifier" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Ej: A2023001"
-                  value={formData.matricula}
-                  onChangeText={(value) => handleInputChange("matricula", value.toUpperCase())}
-                  style={[styles.input, errors.matricula && styles.inputError]}
-                  maxLength={10}
-                />
-              </View>
-              {errors.matricula && <Text style={styles.errorText}>{errors.matricula}</Text>}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Carrera</Text>
-              <View style={styles.inputWrapper}>
-                <WebIcon name="book-education" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Ej: Ingeniería en Sistemas"
-                  value={formData.carrera}
-                  onChangeText={(value) => handleInputChange("carrera", value)}
-                  style={styles.input}
-                />
-              </View>
-            </View>
-          </>
-        );
-
-      case "profesor":
-        return (
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Departamento</Text>
-            <View style={styles.inputWrapper}>
-              <WebIcon name="office-building" size={20} color="#666" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Ej: Ciencias Básicas"
-                value={formData.carrera}
-                onChangeText={(value) => handleInputChange("carrera", value)}
-                style={styles.input}
-              />
-            </View>
-          </View>
-        );
-
-      default:
-        return null;
+      if (Platform.OS === 'web') {
+          alert(msg);
+      } else {
+          // Si tienes configurado un Snackbar global sería ideal, si no, warning en consola
+          console.warn(msg); 
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Estilos dinámicos
+  const containerStyle = { backgroundColor: theme.colors.background };
+  const cardStyle = { backgroundColor: theme.colors.surface, borderRadius: 16, padding: 20 };
+  const textSecondary = { color: theme.colors.onSurfaceVariant };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, containerStyle]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        style={{ flex: 1 }}
       >
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity 
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <WebIcon name="arrow-left" size={24} color="#007bff" />
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Icon name="arrow-left" size={24} color={theme.colors.primary} />
             </TouchableOpacity>
-            <Text style={styles.title}>Crear Cuenta</Text>
-            <View style={styles.backButtonPlaceholder} />
+            <Text variant="headlineMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
+              Crear Cuenta
+            </Text>
+            <View style={{ width: 40 }} />
           </View>
 
-          <Text style={styles.subtitle}>
-            Completa el formulario para registrarte
+          <Text style={[styles.subtitle, textSecondary]}>
+            Ingresa tus datos institucionales
           </Text>
 
-          {/* Selección de Rol */}
-          <View style={styles.roleContainer}>
-            <Text style={styles.sectionTitle}>Tipo de Usuario *</Text>
-            <View style={styles.roleButtons}>
-              {roles.map((role) => (
-                <TouchableOpacity
-                  key={role.id}
-                  style={[
-                    styles.roleButton,
-                    selectedRole === role.id && styles.roleButtonActive
-                  ]}
-                  onPress={() => setSelectedRole(role.id)}
-                >
-                  <Icon
-                    name={role.icon}
-                    size={20}
-                    color={selectedRole === role.id ? "#fff" : "#007bff"}
-                  />
-                  <Text
-                    style={[
-                      styles.roleButtonText,
-                      selectedRole === role.id && styles.roleButtonTextActive
-                    ]}
-                  >
-                    {role.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
-          {/* Información Personal */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Información Personal</Text>
+          {/* Formulario */}
+          <View style={cardStyle}>
             
-            <View style={styles.row}>
-              <View style={[styles.inputContainer, { flex: 1, marginRight: 10 }]}>
-                <Text style={styles.label}>Nombre *</Text>
-                <View style={styles.inputWrapper}>
-                  <WebIcon name="account" size={20} color="#666" style={styles.inputIcon} />
-                  <TextInput
-                    placeholder="Juan"
-                    value={formData.nombre}
-                    onChangeText={(value) => handleInputChange("nombre", value)}
-                    style={[styles.input, errors.nombre && styles.inputError]}
-                    autoCapitalize="words"
-                  />
-                </View>
-                {errors.nombre && <Text style={styles.errorText}>{errors.nombre}</Text>}
-              </View>
-
-              <View style={[styles.inputContainer, { flex: 1 }]}>
-                <Text style={styles.label}>Apellido *</Text>
-                <View style={styles.inputWrapper}>
-                  <WebIcon name="account" size={20} color="#666" style={styles.inputIcon} />
-                  <TextInput
-                    placeholder="Pérez"
-                    value={formData.apellido}
-                    onChangeText={(value) => handleInputChange("apellido", value)}
-                    style={[styles.input, errors.apellido && styles.inputError]}
-                    autoCapitalize="words"
-                  />
-                </View>
-                {errors.apellido && <Text style={styles.errorText}>{errors.apellido}</Text>}
-              </View>
-            </View>
-
+            {/* NOMBRE */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Correo Electrónico *</Text>
-              <View style={styles.inputWrapper}>
-                <WebIcon name="email" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="ejemplo@escuela.edu"
-                  value={formData.correo}
-                  onChangeText={(value) => handleInputChange("correo", value.toLowerCase())}
-                  style={[styles.input, errors.correo && styles.inputError]}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              </View>
-              {errors.correo && <Text style={styles.errorText}>{errors.correo}</Text>}
+              <TextInput
+                label="Nombre Completo"
+                placeholder="Ej: Alexander Velez"
+                value={formData.nombre}
+                onChangeText={(v) => handleInputChange("nombre", v)}
+                mode="outlined"
+                left={<TextInput.Icon icon="account" />}
+                error={!!errors.nombre}
+                style={{ backgroundColor: theme.colors.surface }}
+              />
+              <HelperText type="error" visible={!!errors.nombre}>{errors.nombre}</HelperText>
             </View>
 
+            {/* CORREO */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Teléfono</Text>
-              <View style={styles.inputWrapper}>
-                <WebIcon name="phone" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="(555) 123-4567"
-                  value={formData.telefono}
-                  onChangeText={(value) => handleInputChange("telefono", formatPhone(value))}
-                  style={[styles.input, errors.telefono && styles.inputError]}
-                  keyboardType="phone-pad"
-                  maxLength={14}
-                />
-              </View>
-              {errors.telefono && <Text style={styles.errorText}>{errors.telefono}</Text>}
+              <TextInput
+                label="Correo Institucional"
+                placeholder="e...@live.uleam.edu.ec"
+                value={formData.correo}
+                onChangeText={(v) => handleInputChange("correo", v.toLowerCase())}
+                mode="outlined"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                left={<TextInput.Icon icon="email" />}
+                error={!!errors.correo}
+                style={{ backgroundColor: theme.colors.surface }}
+              />
+              <HelperText type="error" visible={!!errors.correo}>{errors.correo}</HelperText>
             </View>
 
-            {/* Campos específicos por rol */}
-            {getRoleSpecificFields()}
+            {/* CONTRASEÑA */}
+            <View style={styles.inputContainer}>
+              <TextInput
+                label="Contraseña"
+                value={formData.contraseña}
+                onChangeText={(v) => handleInputChange("contraseña", v)}
+                mode="outlined"
+                secureTextEntry={!showPassword}
+                left={<TextInput.Icon icon="lock" />}
+                right={<TextInput.Icon icon={showPassword ? "eye-off" : "eye"} onPress={() => setShowPassword(!showPassword)} />}
+                error={!!errors.contraseña}
+                style={{ backgroundColor: theme.colors.surface }}
+              />
+              <HelperText type="error" visible={!!errors.contraseña}>{errors.contraseña}</HelperText>
+            </View>
+
+            {/* CONFIRMAR */}
+            <View style={styles.inputContainer}>
+              <TextInput
+                label="Confirmar Contraseña"
+                value={formData.confirmarContraseña}
+                onChangeText={(v) => handleInputChange("confirmarContraseña", v)}
+                mode="outlined"
+                secureTextEntry={!showConfirmPassword}
+                left={<TextInput.Icon icon="lock-check" />}
+                right={<TextInput.Icon icon={showConfirmPassword ? "eye-off" : "eye"} onPress={() => setShowConfirmPassword(!showConfirmPassword)} />}
+                error={!!errors.confirmarContraseña}
+                style={{ backgroundColor: theme.colors.surface }}
+              />
+              <HelperText type="error" visible={!!errors.confirmarContraseña}>{errors.confirmarContraseña}</HelperText>
+            </View>
+
+            {/* BOTÓN */}
+            <Button
+              mode="contained"
+              onPress={handleRegister}
+              loading={isLoading}
+              disabled={isLoading}
+              style={styles.button}
+              contentStyle={{ paddingVertical: 5 }}
+            >
+              {isLoading ? "Registrando..." : "Crear Cuenta"}
+            </Button>
           </View>
 
-          {/* Seguridad */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Seguridad</Text>
-            
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Contraseña *</Text>
-              <View style={styles.inputWrapper}>
-                <WebIcon name="lock" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Mínimo 8 caracteres"
-                  value={formData.contraseña}
-                  onChangeText={(value) => handleInputChange("contraseña", value)}
-                  style={[styles.input, errors.contraseña && styles.inputError]}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Icon
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={20}
-                    color="#666"
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.contraseña ? (
-                <Text style={styles.errorText}>{errors.contraseña}</Text>
-              ) : (
-                <Text style={styles.helperText}>
-                  Debe contener: 8+ caracteres, mayúscula y número
-                </Text>
-              )}
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirmar Contraseña *</Text>
-              <View style={styles.inputWrapper}>
-                <WebIcon name="lock-check" size={20} color="#666" style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Repite tu contraseña"
-                  value={formData.confirmarContraseña}
-                  onChangeText={(value) => handleInputChange("confirmarContraseña", value)}
-                  style={[styles.input, errors.confirmarContraseña && styles.inputError]}
-                  secureTextEntry={!showConfirmPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  <Icon
-                    name={showConfirmPassword ? "eye-off" : "eye"}
-                    size={20}
-                    color="#666"
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.confirmarContraseña && (
-                <Text style={styles.errorText}>{errors.confirmarContraseña}</Text>
-              )}
-            </View>
-          </View>
-
-          {/* Términos y Condiciones */}
-          <View style={styles.termsContainer}>
-            <WebIcon name="shield-check" size={20} color="#007bff" />
-            <Text style={styles.termsText}>
-              Al registrarte, aceptas nuestros Términos de Servicio y Política de Privacidad
-            </Text>
-          </View>
-
-          {/* Botón de Registro */}
-          <TouchableOpacity
-            style={[styles.registerButton, isLoading && styles.buttonDisabled]}
-            onPress={handleRegister}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.registerButtonText}>Crear Cuenta</Text>
-                <WebIcon name="check-circle" size={20} color="#fff" />
-              </>
-            )}
-          </TouchableOpacity>
-
-          {/* Enlace a Login */}
           <View style={styles.loginLinkContainer}>
-            <Text style={styles.loginText}>¿Ya tienes una cuenta? </Text>
+            <Text style={textSecondary}>¿Ya tienes una cuenta? </Text>
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={styles.loginLink}>Iniciar Sesión</Text>
+              <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Iniciar Sesión</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Información adicional */}
-          <View style={styles.infoBox}>
-            <WebIcon name="information" size={18} color="#666" />
-            <Text style={styles.infoText}>
-              Los campos marcados con * son obligatorios. 
-              Tu información está protegida y solo será usada con fines académicos.
-            </Text>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* === MODAL DE ÉXITO AUTOMÁTICO === */}
+      <Portal>
+        <Dialog visible={successVisible} dismissable={false} style={{ backgroundColor: theme.colors.elevation.level3 }}>
+          <Dialog.Icon icon="check-circle" size={50} color="#4CAF50" />
+          <Dialog.Title style={{ textAlign: 'center' }}>¡Cuenta Creada!</Dialog.Title>
+          <Dialog.Content>
+            <Paragraph style={{ textAlign: 'center', marginBottom: 20 }}>
+              Tu registro fue exitoso.
+            </Paragraph>
+            
+            {/* INDICADOR DE CARGA Y TEXTO DE REDIRECCIÓN */}
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                <ActivityIndicator animating={true} color={theme.colors.primary} size="small" />
+                <Text style={{ marginTop: 10, color: theme.colors.secondary, fontSize: 12 }}>
+                    Redirigiendo al login...
+                </Text>
+            </View>
+
+          </Dialog.Content>
+          {/* Sin botones porque redirige solo */}
+        </Dialog>
+      </Portal>
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
+  safeArea: { flex: 1 },
+  scrollContent: { padding: 20 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 20,
-    marginBottom: 15,
-  },
-  backButton: {
-    padding: 10,
-  },
-  backButtonPlaceholder: {
-    width: 44,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 25,
-  },
-  roleContainer: {
-    marginBottom: 25,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 15,
-  },
-  roleButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  roleButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    marginHorizontal: 5,
-    borderWidth: 1,
-    borderColor: '#007bff',
-    borderRadius: 10,
-    backgroundColor: '#fff',
-  },
-  roleButtonActive: {
-    backgroundColor: '#007bff',
-    borderColor: '#0056b3',
-  },
-  roleButtonText: {
-    marginLeft: 8,
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#007bff',
-  },
-  roleButtonTextActive: {
-    color: '#fff',
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  row: {
-    flexDirection: 'row',
     marginBottom: 10,
+    marginTop: 10,
   },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#444',
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    backgroundColor: '#f9f9f9',
-  },
-  inputIcon: {
-    paddingHorizontal: 15,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
-    fontSize: 16,
-    color: '#333',
-  },
-  inputError: {
-    borderColor: '#dc3545',
-    borderWidth: 1,
-  },
-  errorText: {
-    color: '#dc3545',
-    fontSize: 12,
-    marginTop: 5,
-    marginLeft: 5,
-  },
-  helperText: {
-    color: '#666',
-    fontSize: 12,
-    marginTop: 5,
-    marginLeft: 5,
-  },
-  eyeIcon: {
-    paddingHorizontal: 15,
-    paddingVertical: 14,
-  },
-  termsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#e8f4ff',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  termsText: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 13,
-    color: '#007bff',
-  },
-  registerButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#28a745',
-    paddingVertical: 18,
-    borderRadius: 12,
-    marginBottom: 20,
-    shadowColor: '#28a745',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginRight: 10,
-  },
+  backButton: { padding: 5 },
+  subtitle: { textAlign: 'center', marginBottom: 20 },
+  inputContainer: { marginBottom: 5 },
+  button: { marginTop: 10, borderRadius: 8 },
   loginLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  loginText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  loginLink: {
-    fontSize: 14,
-    color: '#007bff',
-    fontWeight: 'bold',
-  },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 30,
-  },
-  infoText: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 12,
-    color: '#666',
-    lineHeight: 18,
-  },
+    marginTop: 30,
+  }
 });
