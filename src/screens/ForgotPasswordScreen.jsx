@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  SafeAreaView,
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  ActivityIndicator,
-  Image
-} from "react-native";
+import {SafeAreaView,View,TextTextInput,TouchableOpacity,StyleSheet,ScrollView,KeyboardAvoidingView,Platform,Alert,ActivityIndicator,Image} from "react-native";
 import WebIcon from "../components/WebIcon";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // <-- AÑADIR ESTO
 
