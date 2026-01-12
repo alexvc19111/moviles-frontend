@@ -1,228 +1,299 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Alert } from 'react-native';
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axiosClient from "../api/axiosClient"; 
+import { 
+    MD3DarkTheme as PaperDarkTheme, 
+    MD3LightTheme as PaperLightTheme 
+} from "react-native-paper";
 
+// ==================== 1. TRADUCCIONES ====================
+const translations = {
+  es: {
+    ajustes: {
+      titulo: 'Ajustes', perfil: 'Perfil', preferencias: 'Preferencias',
+      seguridad: 'Seguridad', acercaDe: 'Acerca de', notificaciones: 'Notificaciones',
+      notificacionesDesc: 'Recibir alertas importantes', modoOscuro: 'Modo Oscuro',
+      modoOscuroDesc: 'Cambiar tema de la aplicación', idioma: 'Idioma',
+      idiomaDesc: 'Lenguaje de la aplicación', cerrarSesion: 'Cerrar Sesión',
+      confirmarCerrarSesion: '¿Estás seguro de que quieres salir?',
+      cancelar: 'Cancelar', siSalir: 'Sí, salir', version: 'Versión'
+    },
+    login: {
+      titulo: 'Iniciar Sesión', usuario: 'Usuario', contraseña: 'Contraseña',
+      ingresar: 'Ingresar', olvideContraseña: '¿Olvidaste tu contraseña?',
+      crearCuenta: 'Crear cuenta', error: 'Error', cargando: 'Cargando...'
+    },
+    alumno: {
+      inicio: 'Inicio', calificaciones: 'Calificaciones', horarios: 'Horarios',
+      materias: 'Materias', asistencias: 'Asistencias', ajustes: 'Ajustes'
+    },
+    general: {
+      guardar: 'Guardar', cancelar: 'Cancelar', aceptar: 'Aceptar',
+      eliminar: 'Eliminar', editar: 'Editar', buscar: 'Buscar',
+      cargando: 'Cargando...', bienvenido: 'Bienvenido', hola: 'Hola',
+      sistema: 'Sistema Escolar' 
+    },
+    home: {
+      bienvenido: '¡Bienvenido de nuevo!',
+      promedio: 'Promedio',
+      asistencia: 'Asistencia',
+      materias: 'Materias',
+      creditos: 'Créditos',
+      proximasClases: 'Próximas Clases Hoy',
+      verHorario: 'Ver horario',
+      misMaterias: 'Mis Materias',
+      verTodas: 'Ver todas',
+      calificacionesRecientes: 'Calificaciones Recientes',
+      verHistorial: 'Ver historial',
+      avisos: 'Avisos Recientes',
+      accionesRapidas: 'Acciones Rápidas',
+      sistema: 'Sistema Escolar'
+    }
+  },
+  en: {
+    ajustes: {
+      titulo: 'Settings', perfil: 'Profile', preferencias: 'Preferences',
+      seguridad: 'Security', acercaDe: 'About', notificaciones: 'Notifications',
+      notificacionesDesc: 'Receive important alerts', modoOscuro: 'Dark Mode',
+      modoOscuroDesc: 'Change application theme', idioma: 'Language',
+      idiomaDesc: 'Application language', cerrarSesion: 'Logout',
+      confirmarCerrarSesion: 'Are you sure you want to logout?',
+      cancelar: 'Cancel', siSalir: 'Yes, logout', version: 'Version'
+    },
+    login: {
+      titulo: 'Login', usuario: 'Username', contraseña: 'Password',
+      ingresar: 'Sign In', olvideContraseña: 'Forgot password?',
+      crearCuenta: 'Create account', error: 'Error', cargando: 'Loading...'
+    },
+    alumno: {
+      inicio: 'Home', calificaciones: 'Grades', horarios: 'Schedule',
+      materias: 'Subjects', asistencias: 'Attendance', ajustes: 'Settings'
+    },
+    general: {
+      guardar: 'Save', cancelar: 'Cancel', aceptar: 'Accept',
+      eliminar: 'Delete', editar: 'Edit', buscar: 'Search',
+      cargando: 'Loading...', bienvenido: 'Welcome', hola: 'Hello',
+      sistema: 'School System'
+    },
+    home: {
+      bienvenido: 'Welcome back!',
+      promedio: 'GPA',
+      asistencia: 'Attendance',
+      materias: 'Subjects',
+      creditos: 'Credits',
+      proximasClases: 'Next Classes Today',
+      verHorario: 'View schedule',
+      misMaterias: 'My Subjects',
+      verTodas: 'See all',
+      calificacionesRecientes: 'Recent Grades',
+      verHistorial: 'View history',
+      avisos: 'Recent Announcements',
+      accionesRapidas: 'Quick Actions',
+      sistema: 'School System'
+    }
+  }
+};
+
+// ==================== 2. CREACIÓN DEL CONTEXTO ====================
 const GlobalContext = createContext();
 
-// URL base de tu API Laravel
-const API_URL = 'http://tu-dominio-laravel.com/api'; // Cambia esto por tu URL
-// Para desarrollo local (Android):
-// const API_URL = 'http://10.0.2.2:8000/api';
-// Para desarrollo local (iOS):
-// const API_URL = 'http://localhost:8000/api';
-
-export const GlobalProvider = ({ children }) => {
+export function GlobalProvider({ children }) {
+  // --- ESTADOS GLOBALES ---
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+  const [language, setLanguage] = useState('es');
+  const [loadingAuth, setLoadingAuth] = useState(true);
 
-  // Cargar datos al iniciar
+  // ==================== 3. API HELPER (AXIOS) ====================
+  const apiRequest = async (endpoint, method = 'GET', body = null) => {
+    try {
+      const response = await axiosClient({
+        url: endpoint,
+        method: method,
+        data: body,
+      });
+      return response.data; 
+    } catch (error) {
+      console.error("API Error:", error.response || error);
+      
+      // Manejo de error 401 (Token vencido)
+      if (error.response && error.response.status === 401) {
+          await logout();
+          Alert.alert("Sesión expirada", "Por favor ingresa nuevamente.");
+      }
+      throw error;
+    }
+  };
+
+  // ==================== 4. CARGA INICIAL ====================
+  const loadInitialData = async () => {
+    try {
+      // 1. Cargar Usuario y Token
+      const savedUser = await AsyncStorage.getItem("@user");
+      const savedToken = await AsyncStorage.getItem("@token");
+
+      // VALIDACIÓN DE SEGURIDAD:
+      // Verificamos que existan Y que no sean la palabra "undefined"
+      if (savedUser && savedToken && savedUser !== "undefined" && savedToken !== "undefined") {
+          try {
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            setToken(savedToken);
+          } catch (e) {
+            // Si el JSON está roto, limpiamos para evitar el crash infinito
+            console.warn("Datos de usuario corruptos, limpiando sesión...");
+            await AsyncStorage.multiRemove(["@user", "@token"]);
+            setUser(null);
+            setToken(null);
+          }
+      }
+
+      // 2. Cargar Tema
+      const savedTheme = await AsyncStorage.getItem("@theme");
+      if (savedTheme) setIsDarkTheme(savedTheme === "dark");
+
+      // 3. Cargar Idioma
+      const savedLang = await AsyncStorage.getItem("@language");
+      if (savedLang) setLanguage(savedLang);
+
+    } catch (e) {
+      console.error("Error general cargando sesión:", e);
+    } finally {
+      setLoadingAuth(false);
+    }
+  };
+
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  const loadInitialData = async () => {
+  // ==================== 5. AUTH LOGIC (CORREGIDO) ====================
+  const login = async (emailInput, passwordInput) => {
     try {
-      const savedUser = await AsyncStorage.getItem('@user');
-      const savedToken = await AsyncStorage.getItem('@token');
-      const savedTheme = await AsyncStorage.getItem('@theme');
+        // Mapeo explícito:
+        // 'correo': es lo que espera Laravel (según tu error anterior).
+        // 'password': es lo que suele esperar Laravel para la clave (incluso en español).
+        // Si tu Laravel espera 'contraseña', cambia 'password:' por 'contraseña:'.
+        
+        const payload = {
+            correo: emailInput,     
+            contraseña: passwordInput 
+        };
 
-      if (savedUser) setUser(JSON.parse(savedUser));
-      if (savedToken) setToken(savedToken);
-      if (savedTheme === 'dark') setIsDarkMode(true);
-    } catch (error) {
-      console.error('Error loading initial data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        const data = await apiRequest('/login', 'POST', payload); 
 
-  // Headers comunes para las peticiones
-  const getHeaders = () => {
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    return headers;
-  };
-
-  // Función genérica para hacer peticiones
-  const apiRequest = async (endpoint, method = 'GET', data = null) => {
-    const url = `${API_URL}${endpoint}`;
-    
-    const config = {
-      method,
-      headers: getHeaders(),
-    };
-
-    if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-      config.body = JSON.stringify(data);
-    }
-
-    try {
-      const response = await fetch(url, config);
-      const result = await response.json();
-
-      if (!response.ok) {
-        // Si el token expiró
-        if (response.status === 401) {
-          await logout();
-          Alert.alert('Sesión expirada', 'Por favor inicia sesión nuevamente');
+        let tokenValue = null;
+        let userData = null;
+        
+       if (data.token && data.token.token && data.token.user) {
+            tokenValue = data.token.token;
+            userData = data.token.user;
+        } 
+        // Caso 2: Estructura plana (Por si arreglas Laravel después)
+        else if (data.token && data.user) {
+            tokenValue = data.token;
+            userData = data.user;
         }
-        throw new Error(result.message || 'Error en la petición');
-      }
 
-      return result;
+        if (tokenValue && userData) {
+            // CORRECCIÓN DE ROL: 
+            // Tu BD devuelve 'rol', pero el Navigator suele buscar 'role'.
+            // Creamos 'role' para que la navegación funcione siempre.
+            if (userData.rol && !userData.role) {
+                userData.role = userData.rol;
+            }
+
+            console.log("✅ Datos extraídos correctamente:");
+            console.log("   - Token:", tokenValue.substring(0, 10) + "...");
+            console.log("   - Usuario:", userData.nombre);
+            console.log("   - Rol:", userData.role);
+
+            setUser(userData);
+            setToken(tokenValue);
+            
+            await AsyncStorage.setItem("@user", JSON.stringify(userData));
+            await AsyncStorage.setItem("@token", tokenValue);
+            return true; 
+        } else {
+             console.error("❌ Estructura de respuesta inesperada:", data);
+             Alert.alert("Error", "El servidor respondió, pero los datos no tienen el formato esperado.");
+             return false;
+        }
+
     } catch (error) {
-      console.error('API Error:', error);
-      throw error;
+        console.log("Error detallado:", error.response?.data); 
+        //Alert.alert("Error de acceso", error.response?.data?.message || error.message);
+        throw error;
     }
   };
 
-  // Login
-  const login = async (email, password) => {
-    try {
-      const data = await apiRequest('/auth/login', 'POST', {
-        email,
-        password,
-      });
-
-      if (data.success) {
-        await AsyncStorage.setItem('@user', JSON.stringify(data.user));
-        await AsyncStorage.setItem('@token', data.token);
-        setUser(data.user);
-        setToken(data.token);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    }
-  };
-
-  // Registro
-  const register = async (userData) => {
-    try {
-      const data = await apiRequest('/auth/register', 'POST', userData);
-      
-      if (data.success) {
-        await AsyncStorage.setItem('@user', JSON.stringify(data.user));
-        await AsyncStorage.setItem('@token', data.token);
-        setUser(data.user);
-        setToken(data.token);
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Register error:', error);
-      throw error;
-    }
-  };
-
-  // Logout
   const logout = async () => {
     try {
-      if (token) {
-        await apiRequest('/auth/logout', 'POST');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
+        if(token) await apiRequest('/logout', 'POST').catch(() => {});
     } finally {
-      await AsyncStorage.multiRemove(['@user', '@token']);
-      setUser(null);
-      setToken(null);
+        setUser(null);
+        setToken(null);
+        await AsyncStorage.multiRemove(["@user", "@token"]);
     }
   };
 
-  // Recuperar contraseña
-  const forgotPassword = async (email) => {
-    return apiRequest('/auth/forgot-password', 'POST', { email });
+  // ==================== 6. UI LOGIC ====================
+  const toggleTheme = async () => {
+    const newVal = !isDarkTheme;
+    setIsDarkTheme(newVal);
+    await AsyncStorage.setItem("@theme", newVal ? "dark" : "light");
   };
 
-  // Verificar código
-  const verifyResetCode = async (email, code) => {
-    return apiRequest('/auth/verify-reset-code', 'POST', { email, code });
+  const changeLanguage = async (lang) => {
+    setLanguage(lang);
+    await AsyncStorage.setItem("@language", lang);
   };
 
-  // Restablecer contraseña
-  const resetPassword = async (resetToken, password, passwordConfirmation) => {
-    return apiRequest('/auth/reset-password', 'POST', {
-      reset_token: resetToken,
-      password,
-      password_confirmation: passwordConfirmation,
-    });
-  };
-
-  // Obtener perfil
-  const getProfile = async () => {
-    const data = await apiRequest('/auth/profile');
+  const t = (key, params = {}) => {
+    const keys = key.split('.');
+    let value = translations[language];
     
-    if (data.success) {
-      await AsyncStorage.setItem('@user', JSON.stringify(data.user));
-      setUser(data.user);
+    for (const k of keys) {
+      value = value?.[k];
     }
-
-    return data;
-  };
-
-  // Actualizar perfil
-  const updateProfile = async (profileData) => {
-    const data = await apiRequest('/auth/profile', 'PUT', profileData);
     
-    if (data.success) {
-      await AsyncStorage.setItem('@user', JSON.stringify(data.user));
-      setUser(data.user);
-    }
+    if (!value) return key;
 
-    return data;
-  };
-
-  // Cambiar contraseña
-  const changePassword = async (currentPassword, newPassword) => {
-    return apiRequest('/auth/change-password', 'POST', {
-      current_password: currentPassword,
-      password: newPassword,
-      password_confirmation: newPassword,
+    let result = value;
+    Object.keys(params).forEach(param => {
+      result = result.replace(`{${param}}`, params[param]);
     });
+    return result;
   };
 
-  // Toggle tema oscuro
-  const toggleDarkMode = async () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    await AsyncStorage.setItem('@theme', newMode ? 'dark' : 'light');
-  };
+  const paperTheme = isDarkTheme ? PaperDarkTheme : PaperLightTheme;
 
-  const value = {
+  // ==================== 7. EXPORTAR VALUE ====================
+  const value = useMemo(() => ({
     user,
     token,
-    loading,
-    isDarkMode,
+    loadingAuth,
     login,
-    register,
     logout,
-    forgotPassword,
-    verifyResetCode,
-    resetPassword,
-    getProfile,
-    updateProfile,
-    changePassword,
-    toggleDarkMode,
     apiRequest,
-  };
+    isDarkTheme,
+    toggleTheme,
+    paperTheme,
+    language,
+    setLanguage: changeLanguage,
+    t
+  }), [user, token, loadingAuth, isDarkTheme, language]);
 
-  return (
-    <GlobalContext.Provider value={value}>
-      {children}
-    </GlobalContext.Provider>
-  );
-};
+  return <GlobalContext.Provider value={value}>{children}</GlobalContext.Provider>;
+}
 
-export const useGlobal = () => useContext(GlobalContext);
+// ==================== HOOK ====================
+export function useGlobalContext() {
+  const context = useContext(GlobalContext);
+  if (!context) {
+    throw new Error("useGlobalContext debe usarse dentro de un GlobalProvider");
+  }
+  return context;
+}

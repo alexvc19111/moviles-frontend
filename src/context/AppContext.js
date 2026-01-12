@@ -130,12 +130,38 @@ const translations = {
 };
 
 // ==================== CONTEXTOS ====================
-export const ThemeContext = createContext();
-export const LanguageContext = createContext();
+const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [language, setLanguage] = useState('es');
+  const [user, setUser] = useState(null);           // Usuario logueado
+  const [isDarkTheme, setIsDarkTheme] = useState(false); // Tema
+  const [language, setLanguage] = useState('es');   // Idioma
+  const [loadingAuth, setLoadingAuth] = useState(true); // Cargando inicial
+
+
+  useEffect(() => {
+    const loadSession = async () => {
+      try {
+        // 1. Cargar Usuario
+        const storedUser = await AsyncStorage.getItem("user");
+        if (storedUser) setUser(JSON.parse(storedUser));
+
+        // 2. Cargar Preferencias
+        const storedTheme = await AsyncStorage.getItem("theme");
+        if (storedTheme) setIsDarkTheme(storedTheme === "dark");
+
+        const storedLang = await AsyncStorage.getItem("language");
+        if (storedLang) setLanguage(storedLang);
+
+      } catch (e) {
+        console.error("Error cargando sesión:", e);
+      } finally {
+        setLoadingAuth(false);
+      }
+    };
+    loadSession();
+  }, []);
+
 
   // Función para obtener traducción
   const t = (key, params = {}) => {

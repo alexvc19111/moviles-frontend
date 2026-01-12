@@ -1,662 +1,389 @@
 import React, { useState } from 'react';
-import { SafeAreaView,  View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert, TextInput, Modal, ActivityIndicator} from 'react-native';
-import WebIcon from "../../components/WebIcon";
+import { 
+  SafeAreaView, 
+  View, 
+  ScrollView, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Switch, 
+  Modal, 
+  Alert 
+} from 'react-native';
+import { Text, useTheme, TextInput } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useGlobalContext } from '../../context/GlobalContext';
 
-const AjustesScreen = ({ navigation, route }) => {
-  // ¡CORREGIR: Proporcionar valores por defecto para route!
-  const routeParams = route?.params || {};
+const AjustesScreen = ({ navigation }) => {
+  // 1. Conexión Global
+  const { 
+    user, 
+    logout, 
+    isDarkTheme, 
+    toggleTheme, 
+    language, 
+    setLanguage, 
+    t 
+  } = useGlobalContext();
   
-  // Estado para manejar errores
-  const [hasError, setHasError] = useState(false);
+  const theme = useTheme(); 
 
-  // Estados para los ajustes - CORREGIDOS
+  // ==================== ESTADOS (AQUÍ FALTABA EL DEL LOGOUT) ====================
   const [notificaciones, setNotificaciones] = useState(true);
-  const [modoOscuro, setModoOscuro] = useState(false);
-  const [idioma, setIdioma] = useState('es');
+  const [modalIdiomaVisible, setModalIdiomaVisible] = useState(false);
+  
+  // 👇 ESTO ERA LO QUE TE FALTABA:
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false); 
+
+  // Edición de nombre (Simulada)
   const [editarNombre, setEditarNombre] = useState(false);
-  const [nuevoNombre, setNuevoNombre] = useState(routeParams.userName || 'Alumno');
-  const [nombreTemporal, setNombreTemporal] = useState(routeParams.userName || 'Alumno');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [usuarioActivo] = useState({
-    nombre: routeParams.userName || 'Juan Pérez',
-    rol: 'Estudiante',
-    matricula: '20230001',
-    carrera: 'Ingeniería en Sistemas'
-  });
+  const [nombreTemporal, setNombreTemporal] = useState(user?.name || user?.nombre || '');
 
-  // Si hay error, mostrar mensaje
-  if (hasError) {
-    return (
-      <SafeAreaView style={styles.errorContainer}>
-        <WebIcon name="alert-circle" size={60} color="#FF6B6B" />
-        <Text style={styles.errorText}>Algo salió mal en la pantalla de ajustes</Text>
-        <TouchableOpacity 
-          style={styles.retryButton}
-          onPress={() => setHasError(false)}
-        >
-          <Text style={styles.retryButtonText}>Reintentar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.backButtonError}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>Volver al inicio</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-
-  // Función para guardar el nombre
-  const guardarNombre = () => {
-    try {
-      if (nombreTemporal.trim() === '') {
-        Alert.alert('Error', 'El nombre no puede estar vacío');
-        return;
+  // Función final de logout (llamada desde el Modal)
+  const performLogout = async () => {
+      try {
+          setLogoutModalVisible(false); // Cerramos el modal
+          await logout(); // Limpiamos sesión
+          // El AppNavigator detectará user=null y cambiará a Login solo
+      } catch (error) {
+          console.error("Error logout:", error);
       }
-      setNuevoNombre(nombreTemporal);
-      setEditarNombre(false);
-      Alert.alert('Éxito', 'Nombre actualizado correctamente');
-    } catch (error) {
-      setHasError(true);
+  };
+
+  // Guardar nombre (Simulado)
+  const guardarNombre = () => {
+    if (nombreTemporal.trim() === '') {
+      Alert.alert('Error', 'El nombre no puede estar vacío');
+      return;
     }
+    setEditarNombre(false);
+    Alert.alert('Info', 'Nombre actualizado localmente.');
   };
 
-  // Función para cambiar idioma
-  const cambiarIdioma = (nuevoIdioma) => {
-    try {
-      setIdioma(nuevoIdioma);
-      setModalVisible(false);
-      Alert.alert(
-        'Idioma cambiado', 
-        `Idioma establecido a ${nuevoIdioma === 'es' ? 'Español' : 'Inglés'}`
-      );
-    } catch (error) {
-      setHasError(true);
-    }
-  };
-
-  // Función para cerrar sesión
-  const handleLogout = () => {
-    Alert.alert(
-      "Cerrar Sesión",
-      "¿Estás seguro de que quieres salir?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sí, salir",
-          style: "destructive",
-          onPress: () => {
-            // Navegar a la pantalla de Login
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
-          },
-        },
-      ]
-    );
-  };
-
-  // Estilos condicionales para modo oscuro
-  const containerStyle = modoOscuro ? styles.darkContainer : styles.lightContainer;
-  const headerStyle = modoOscuro ? styles.darkHeader : styles.lightHeader;
-  const sectionStyle = modoOscuro ? styles.darkSection : styles.lightSection;
-  const textStyle = modoOscuro ? styles.darkText : styles.lightText;
-  const cardStyle = modoOscuro ? styles.darkCard : styles.lightCard;
+  // Estilos dinámicos
+  const containerStyle = { backgroundColor: theme.colors.background };
+  const cardStyle = { backgroundColor: theme.colors.elevation.level1, borderRadius: 12 };
+  const textSecondary = { color: theme.colors.onSurfaceVariant };
 
   return (
     <SafeAreaView style={[styles.safeArea, containerStyle]}>
       {/* Header */}
-      <View style={[styles.header, headerStyle]}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()} 
-          style={styles.backButton}
-        >
-          <WebIcon name="arrow-left" size={24} color="#2196F3" />
+      <View style={[styles.header, { borderBottomColor: theme.colors.outlineVariant }]}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-left" size={24} color={theme.colors.primary} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, textStyle]}>
-          Ajustes
+        <Text variant="titleLarge" style={{ fontWeight: 'bold' }}>
+          {t('ajustes.titulo') || "Ajustes"}
         </Text>
-        <View style={styles.placeholder} />
+        <View style={{ width: 40 }} />
       </View>
 
-      <ScrollView 
-        style={styles.container} 
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        
         {/* Sección de Perfil */}
-        <View style={[styles.section, sectionStyle]}>
-          <Text style={[styles.sectionTitle, textStyle]}>
-            Perfil del Alumno
+        <View style={styles.section}>
+          <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+            {t('ajustes.perfil') || "Perfil"}
           </Text>
           
           <View style={[styles.profileCard, cardStyle]}>
             <View style={styles.avatarContainer}>
-              <WebIcon name="account-school" size={70} color="#2196F3" />
+              <Icon name="account-circle" size={70} color={theme.colors.primary} />
             </View>
             
             <View style={styles.profileInfo}>
               {editarNombre ? (
-                <View style={styles.editNameContainer}>
+                <View>
                   <TextInput
-                    style={styles.nameInput}
                     value={nombreTemporal}
                     onChangeText={setNombreTemporal}
+                    mode="flat"
+                    style={{ backgroundColor: 'transparent', height: 40, marginBottom: 5 }}
                     autoFocus
-                    placeholder="Nuevo nombre"
-                    placeholderTextColor={modoOscuro ? "#888" : "#999"}
                   />
-                  <View style={styles.editButtons}>
-                    <TouchableOpacity 
-                      onPress={guardarNombre} 
-                      style={[styles.iconButton, styles.saveButton]}
-                    >
-                      <WebIcon name="check" size={22} color="#4CAF50" />
+                  <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity onPress={guardarNombre} style={{ marginRight: 15 }}>
+                       <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>Guardar</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      onPress={() => {
-                        setNombreTemporal(nuevoNombre);
-                        setEditarNombre(false);
-                      }} 
-                      style={[styles.iconButton, styles.cancelButton]}
-                    >
-                      <WebIcon name="close" size={22} color="#F44336" />
+                    <TouchableOpacity onPress={() => setEditarNombre(false)}>
+                       <Text style={{ color: '#F44336' }}>Cancelar</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
               ) : (
                 <View style={styles.nameContainer}>
-                  <Text style={[styles.userName, textStyle]}>{nuevoNombre}</Text>
-                  <TouchableOpacity 
-                    onPress={() => setEditarNombre(true)} 
-                    style={styles.editButton}
-                  >
-                    <WebIcon name="pencil" size={20} color="#2196F3" />
+                  <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>
+                    {nombreTemporal}
+                  </Text>
+                  <TouchableOpacity onPress={() => setEditarNombre(true)} style={styles.editButton}>
+                    <Icon name="pencil" size={18} color={theme.colors.primary} />
                   </TouchableOpacity>
                 </View>
               )}
               
-              <Text style={styles.userRole}>Estudiante</Text>
-              
-              <View style={styles.userDetails}>
-                <View style={styles.detailRow}>
-                  <WebIcon name="identifier" size={16} color="#757575" />
-                  <Text style={styles.detailText}>Matrícula: {usuarioActivo.matricula}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <WebIcon name="book-education" size={16} color="#757575" />
-                  <Text style={styles.detailText}>Carrera: {usuarioActivo.carrera}</Text>
-                </View>
-              </View>
+              <Text style={textSecondary}>{user?.role || 'Estudiante'}</Text>
+              <Text style={[textSecondary, { fontSize: 12 }]}>{user?.email || user?.correo}</Text>
             </View>
           </View>
         </View>
 
         {/* Sección de Preferencias */}
-        <View style={[styles.section, sectionStyle]}>
-          <Text style={[styles.sectionTitle, textStyle]}>
-            Preferencias
+        <View style={styles.section}>
+          <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+            {t('ajustes.preferencias') || "Preferencias"}
           </Text>
           
-          <View style={styles.preferenceItem}>
+          {/* Notificaciones */}
+          <View style={[styles.preferenceItem, { borderBottomColor: theme.colors.outlineVariant }]}>
             <View style={styles.preferenceLeft}>
-              <WebIcon name="bell-outline" size={26} color="#666" />
-              <View>
-                <Text style={[styles.preferenceText, textStyle]}>
-                  Notificaciones
-                </Text>
-                <Text style={styles.preferenceSubtext}>
-                  Recibir alertas importantes
-                </Text>
+              <Icon name="bell-outline" size={26} color={theme.colors.onSurface} />
+              <View style={{ marginLeft: 15 }}>
+                <Text variant="bodyLarge">{t('ajustes.notificaciones') || "Notificaciones"}</Text>
+                <Text variant="bodySmall" style={textSecondary}>{t('ajustes.notificacionesDesc') || "Alertas importantes"}</Text>
               </View>
             </View>
             <Switch
               value={notificaciones}
               onValueChange={setNotificaciones}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={notificaciones ? '#2196F3' : '#f4f3f4'}
+              trackColor={{ false: '#767577', true: theme.colors.primaryContainer }}
+              thumbColor={notificaciones ? theme.colors.primary : '#f4f3f4'}
             />
           </View>
 
-          <View style={styles.preferenceItem}>
+          {/* Modo Oscuro */}
+          <View style={[styles.preferenceItem, { borderBottomColor: theme.colors.outlineVariant }]}>
             <View style={styles.preferenceLeft}>
-              <WebIcon name="theme-light-dark" size={26} color="#666" />
-              <View>
-                <Text style={[styles.preferenceText, textStyle]}>
-                  Modo oscuro
-                </Text>
-                <Text style={styles.preferenceSubtext}>
-                  Cambiar tema de la aplicación
-                </Text>
+              <Icon name="theme-light-dark" size={26} color={theme.colors.onSurface} />
+              <View style={{ marginLeft: 15 }}>
+                <Text variant="bodyLarge">{t('ajustes.modoOscuro') || "Modo Oscuro"}</Text>
+                <Text variant="bodySmall" style={textSecondary}>{t('ajustes.modoOscuroDesc') || "Tema de la app"}</Text>
               </View>
             </View>
             <Switch
-              value={modoOscuro}
-              onValueChange={setModoOscuro}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={modoOscuro ? '#2196F3' : '#f4f3f4'}
+              value={isDarkTheme}
+              onValueChange={toggleTheme}
+              trackColor={{ false: '#767577', true: theme.colors.primaryContainer }}
+              thumbColor={isDarkTheme ? theme.colors.primary : '#f4f3f4'}
             />
           </View>
 
+          {/* Idioma */}
           <TouchableOpacity 
             style={styles.preferenceItem} 
-            onPress={() => setModalVisible(true)}
+            onPress={() => setModalIdiomaVisible(true)}
           >
             <View style={styles.preferenceLeft}>
-              <WebIcon name="translate" size={26} color="#666" />
-              <View>
-                <Text style={[styles.preferenceText, textStyle]}>
-                  Idioma
-                </Text>
-                <Text style={styles.preferenceSubtext}>
-                  Lenguaje de la aplicación
-                </Text>
+              <Icon name="translate" size={26} color={theme.colors.onSurface} />
+              <View style={{ marginLeft: 15 }}>
+                <Text variant="bodyLarge">{t('ajustes.idioma') || "Idioma"}</Text>
+                <Text variant="bodySmall" style={textSecondary}>{t('ajustes.idiomaDesc') || "Lenguaje"}</Text>
               </View>
             </View>
-            <View style={styles.languageValue}>
-              <Text style={styles.languageText}>
-                {idioma === 'es' ? 'Español' : 'English'}
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ color: theme.colors.primary, marginRight: 5 }}>
+                {language === 'es' ? 'Español' : 'English'}
               </Text>
-              <WebIcon name="chevron-right" size={22} color="#999" />
+              <Icon name="chevron-right" size={22} color={theme.colors.onSurfaceVariant} />
             </View>
           </TouchableOpacity>
         </View>
 
-        {/* Botón de cerrar sesión */}
+        {/* Botón Cerrar Sesión (ABRE EL MODAL) */}
         <TouchableOpacity 
-          style={styles.logoutButton}
-          onPress={handleLogout}
+          style={[styles.logoutButton, { backgroundColor: theme.colors.errorContainer }]}
+          onPress={() => setLogoutModalVisible(true)} // <--- AHORA SÍ FUNCIONARÁ
         >
-          <WebIcon name="logout" size={22} color="#F44336" />
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
+          <Icon name="logout" size={22} color={theme.colors.error} />
+          <Text style={[styles.logoutText, { color: theme.colors.error }]}>
+            {t('ajustes.cerrarSesion') || "Cerrar Sesión"}
+          </Text>
         </TouchableOpacity>
 
         {/* Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Sistema Escolar v2.1</Text>
-          <Text style={styles.footerSubtext}>© 2024 - Todos los derechos reservados</Text>
+          <Text style={{ color: theme.colors.outline }}>{t('general.sistema') || "Sistema Escolar"} v2.1</Text>
         </View>
       </ScrollView>
 
-      {/* Modal para seleccionar idioma */}
+      {/* === MODAL IDIOMA === */}
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={modalIdiomaVisible}
+        onRequestClose={() => setModalIdiomaVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, modoOscuro && styles.darkModal]}>
-            <Text style={[styles.modalTitle, textStyle]}>
-              Seleccionar idioma
+        <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setModalIdiomaVisible(false)}
+        >
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.elevation.level3 }]}>
+            <Text variant="headlineSmall" style={{ marginBottom: 20, textAlign: 'center' }}>
+              {t('ajustes.idioma') || "Idioma"}
             </Text>
             
             <TouchableOpacity 
-              style={[
-                styles.modalOption, 
-                idioma === 'es' && styles.selectedOption,
-                modoOscuro && styles.darkModalOption
-              ]}
-              onPress={() => cambiarIdioma('es')}
+              style={[styles.modalOption, language === 'es' && { backgroundColor: theme.colors.secondaryContainer }]}
+              onPress={() => { setLanguage('es'); setModalIdiomaVisible(false); }}
             >
-              <View style={styles.modalOptionLeft}>
-                <WebIcon name="flag" size={24} color="#2196F3" />
-                <Text style={[
-                  styles.modalOptionText, 
-                  idioma === 'es' && styles.selectedText,
-                  textStyle
-                ]}>
-                  Español
-                </Text>
-              </View>
-              {idioma === 'es' && (
-                <WebIcon name="check-circle" size={24} color="#4CAF50" />
-              )}
+              <Text variant="bodyLarge">🇪🇸 Español</Text>
+              {language === 'es' && <Icon name="check" size={20} color={theme.colors.primary} />}
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[
-                styles.modalOption, 
-                idioma === 'en' && styles.selectedOption,
-                modoOscuro && styles.darkModalOption
-              ]}
-              onPress={() => cambiarIdioma('en')}
+              style={[styles.modalOption, language === 'en' && { backgroundColor: theme.colors.secondaryContainer }]}
+              onPress={() => { setLanguage('en'); setModalIdiomaVisible(false); }}
             >
-              <View style={styles.modalOptionLeft}>
-                <WebIcon name="flag" size={24} color="#F44336" />
-                <Text style={[
-                  styles.modalOptionText, 
-                  idioma === 'en' && styles.selectedText,
-                  textStyle
-                ]}>
-                  English
-                </Text>
-              </View>
-              {idioma === 'en' && (
-                <WebIcon name="check-circle" size={24} color="#4CAF50" />
-              )}
+              <Text variant="bodyLarge">🇺🇸 English</Text>
+              {language === 'en' && <Icon name="check" size={20} color={theme.colors.primary} />}
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={styles.modalCloseButton}
-              onPress={() => setModalVisible(false)}
+                style={{ marginTop: 15, padding: 10, alignItems: 'center' }}
+                onPress={() => setModalIdiomaVisible(false)}
             >
-              <Text style={styles.modalCloseText}>Cancelar</Text>
+                <Text style={{ color: theme.colors.primary }}>{t('ajustes.cancelar') || "Cancelar"}</Text>
             </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* === MODAL LOGOUT (EL QUE TE FALTABA O FALLABA) === */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={logoutModalVisible}
+        onRequestClose={() => setLogoutModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.colors.elevation.level3 }]}>
+            
+            <Icon name="logout-variant" size={50} color={theme.colors.error} style={{marginBottom: 15, alignSelf:'center'}} />
+            
+            <Text variant="titleLarge" style={{ fontWeight: 'bold', marginBottom: 10, textAlign:'center' }}>
+                {t('ajustes.cerrarSesion') || "Cerrar Sesión"}
+            </Text>
+            
+            <Text style={[textSecondary, { textAlign: 'center', marginBottom: 20 }]}>
+                {t('ajustes.confirmarCerrarSesion') || "¿Seguro que quieres salir?"}
+            </Text>
+            
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, { backgroundColor: theme.colors.surfaceVariant }]} 
+                onPress={() => setLogoutModalVisible(false)}
+              >
+                <Text style={{ color: theme.colors.onSurfaceVariant }}>{t('ajustes.cancelar') || "Cancelar"}</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalButton, { backgroundColor: theme.colors.error }]} 
+                onPress={performLogout} // <--- LLAMA A LA FUNCIÓN DE SALIDA
+              >
+                <Text style={{ color: 'white' }}>{t('ajustes.siSalir') || "Salir"}</Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
         </View>
       </Modal>
+
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  lightContainer: {
-    backgroundColor: '#F5F7FA',
-  },
-  darkContainer: {
-    backgroundColor: '#121212',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F7FA',
-    padding: 20,
-  },
-  errorText: {
-    marginTop: 20,
-    fontSize: 18,
-    color: '#FF6B6B',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  retryButton: {
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  backButtonError: {
-    padding: 15,
-  },
-  backButtonText: {
-    color: '#2196F3',
-    fontSize: 16,
-  },
+  safeArea: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 18,
+    paddingVertical: 15,
     borderBottomWidth: 1,
   },
-  lightHeader: {
-    backgroundColor: '#FFFFFF',
-    borderBottomColor: '#EEEEEE',
-  },
-  darkHeader: {
-    backgroundColor: '#1E1E1E',
-    borderBottomColor: '#333',
-  },
-  backButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#F0F7FF',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  lightText: {
-    color: '#212121',
-  },
-  darkText: {
-    color: '#FFFFFF',
-  },
-  placeholder: {
-    width: 40,
-  },
-  container: {
-    flex: 1,
-    paddingBottom: 25,
-  },
+  scrollContent: { paddingBottom: 30 },
   section: {
     marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 16,
-    padding: 20,
-  },
-  lightSection: {
-    backgroundColor: '#FFFFFF',
-  },
-  darkSection: {
-    backgroundColor: '#1E1E1E',
+    marginTop: 20,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 20,
+    marginBottom: 10,
+    fontWeight: 'bold',
   },
   profileCard: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 12,
-    padding: 15,
+    alignItems: 'center',
+    padding: 20,
   },
-  lightCard: {
-    backgroundColor: '#F8F9FA',
-  },
-  darkCard: {
-    backgroundColor: '#2D2D2D',
-  },
-  avatarContainer: {
-    marginRight: 20,
-  },
-  profileInfo: {
-    flex: 1,
-  },
+  avatarContainer: { marginRight: 20 },
+  profileInfo: { flex: 1 },
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    flexWrap: 'wrap'
   },
-  userName: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginRight: 12,
-  },
-  editButton: {
-    padding: 6,
-    backgroundColor: '#F0F7FF',
-    borderRadius: 20,
-  },
-  editNameContainer: {
-    marginBottom: 8,
-  },
-  nameInput: {
-    fontSize: 22,
-    fontWeight: '700',
-    borderBottomWidth: 2,
-    borderBottomColor: '#2196F3',
-    paddingVertical: 4,
-    marginBottom: 8,
-    color: '#212121',
-  },
-  editButtons: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-  },
-  iconButton: {
-    padding: 8,
-    borderRadius: 20,
-    marginLeft: 10,
-  },
-  saveButton: {
-    backgroundColor: '#E8F5E9',
-  },
-  cancelButton: {
-    backgroundColor: '#FFEBEE',
-  },
-  userRole: {
-    fontSize: 16,
-    color: '#757575',
-    fontWeight: '500',
-    marginBottom: 12,
-  },
-  userDetails: {
-    marginTop: 8,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  detailText: {
-    fontSize: 14,
-    color: '#616161',
-    marginLeft: 8,
-  },
+  editButton: { marginLeft: 10 },
   preferenceItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F5F5F5',
   },
   preferenceLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
   },
-  preferenceText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 15,
-  },
-  preferenceSubtext: {
-    fontSize: 13,
-    color: '#9E9E9E',
-    marginLeft: 15,
-    marginTop: 2,
-  },
-  languageValue: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  languageText: {
-    fontSize: 14,
-    color: '#757575',
-    marginRight: 8,
-    fontWeight: '500',
-  },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFEBEE',
     marginHorizontal: 16,
-    marginTop: 30,
-    paddingVertical: 16,
+    marginTop: 40,
+    paddingVertical: 15,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#FFCDD2',
   },
   logoutText: {
-    fontSize: 17,
-    color: '#F44336',
-    fontWeight: '600',
-    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
   footer: {
     alignItems: 'center',
-    marginTop: 25,
-    paddingBottom: 30,
+    marginTop: 30,
   },
-  footerText: {
-    fontSize: 14,
-    color: '#9E9E9E',
-    fontWeight: '500',
-  },
-  footerSubtext: {
-    fontSize: 12,
-    color: '#BDBDBD',
-    marginTop: 4,
-  },
-  modalContainer: {
+  // Modal Styles
+  modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    maxWidth: 350,
-  },
-  darkModal: {
-    backgroundColor: '#1E1E1E',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 24,
-    textAlign: 'center',
+    borderRadius: 20,
+    padding: 25,
+    width: '80%',
   },
   modalOption: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    backgroundColor: '#F8F9FA',
-  },
-  darkModalOption: {
-    backgroundColor: '#2D2D2D',
-  },
-  selectedOption: {
-    backgroundColor: '#E3F2FD',
-    borderWidth: 1,
-    borderColor: '#2196F3',
-  },
-  modalOptionLeft: {
-    flexDirection: 'row',
     alignItems: 'center',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  modalOptionText: {
-    fontSize: 17,
-    fontWeight: '500',
-    marginLeft: 15,
+  modalButtons: { 
+    flexDirection: "row", 
+    width: "100%", 
+    justifyContent: "space-between" 
   },
-  selectedText: {
-    color: '#2196F3',
-  },
-  modalCloseButton: {
-    marginTop: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#F5F5F5',
-  },
-  modalCloseText: {
-    fontSize: 16,
-    color: '#2196F3',
-    fontWeight: '600',
+  modalButton: { 
+    flex: 1, 
+    paddingVertical: 14, 
+    borderRadius: 10, 
+    alignItems: "center", 
+    marginHorizontal: 6 
   },
 });
 
