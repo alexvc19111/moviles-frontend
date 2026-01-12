@@ -1,6 +1,20 @@
-import React, { useState } from "react";
-import {SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image} from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  ActivityIndicator,
+  Image
+} from "react-native";
 import WebIcon from "../components/WebIcon";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // <-- AÑADIR ESTO
 
 export default function ForgotPasswordScreen({ navigation }) {
   const [step, setStep] = useState(1); // 1: Email, 2: Código, 3: Nueva contraseña
@@ -14,6 +28,23 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [codigoEnviado, setCodigoEnviado] = useState("");
   const [tiempoRestante, setTiempoRestante] = useState(0);
+
+  // Efecto para el temporizador
+  useEffect(() => {
+    if (tiempoRestante <= 0) return;
+
+    const timer = setInterval(() => {
+      setTiempoRestante((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [tiempoRestante]);
 
   // Validar email
   const validateEmail = () => {
@@ -146,7 +177,7 @@ export default function ForgotPasswordScreen({ navigation }) {
     if (tiempoRestante > 0) {
       Alert.alert(
         "Espera un momento",
-        `Puedes reenviar el código en ${tiempoRestante} segundos`
+        `Puedes reenviar el código en ${formatTime(tiempoRestante)}`
       );
       return;
     }
@@ -643,11 +674,20 @@ const styles = StyleSheet.create({
     padding: 25,
     marginHorizontal: 20,
     marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+      },
+      android: {
+        elevation: 3,
+      },
+      web: {
+        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
+      }
+    }),
   },
   iconContainer: {
     alignItems: 'center',
